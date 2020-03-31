@@ -21,7 +21,7 @@ int main(int argc, const char** argv) {
   auto theName = std::make_unique<char[]>(maxLen);
   lib->getParserName(theName.get(), maxLen);
 
-  std::cout << "LIB name: " << theName << "\n";
+  std::cout << "LIB name: " << theName.get() << "\n";
 
   return 0;
 }
