@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+cmake-build*
+.idea
+.vscode
+*.swp
+.project*
+tags
+
+
+
