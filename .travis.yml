@@ -9,17 +9,17 @@ services:
 
 jobs:
   include:
-#    - stage: builder container creation
-#      install: skip
-#      script: travis/builderContainerCreation.sh
-#
-#    - stage: build (compile, unit test, package)
-#      install: skip
-#      script: travis/build.sh
+   - stage: builder container creation
+     install: skip
+     script: travis/builderContainerCreation.sh
 
-    # - stage: container creation and publishing
-    #   install: skip
-    #   script: travis/containerCreation.sh
+   - stage: build (compile, unit test, package)
+     install: skip
+     script: travis/build.sh
+
+    - stage: container creation and publishing
+      install: skip
+      script: travis/containerCreation.sh
 
     # - stage: smoke and acceptance test
     #   install: skip
