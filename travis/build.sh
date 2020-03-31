@@ -20,4 +20,11 @@ then
 		exit
   fi
 
+
+else
+
+    source travis/libs/build.sh
+
+    docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} ./test/libtest-test
+
 fi
