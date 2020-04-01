@@ -27,7 +27,7 @@ class EOEPCAows : protected mods::IModInterface {
         return;
       }
 
-      parseFromFile = (void (*)(const char*, EOEPCA::OWS::OWSParameter*))dlsym(
+      parseFromFile = (EOEPCA::OWS::OWSParameter*  (*)(const char*))dlsym(
           handle, "parseFromFile");
       if (!parseFromFile) {
         setValid(false);
@@ -35,7 +35,7 @@ class EOEPCAows : protected mods::IModInterface {
       }
 
       parseFromMemory =
-          (void (*)(const char*, int, EOEPCA::OWS::OWSParameter*))dlsym(
+          (EOEPCA::OWS::OWSParameter*  (*)(const char*, int))dlsym(
               handle, "parseFromMemory");
       if (!parseFromMemory) {
         setValid(false);
@@ -63,8 +63,8 @@ class EOEPCAows : protected mods::IModInterface {
  public:
   long (*version)(void);
   void (*getParserName)(char*, int);
-  void (*parseFromFile)(const char*, EOEPCA::OWS::OWSParameter*);
-  void (*parseFromMemory)(const char*, int, EOEPCA::OWS::OWSParameter*);
+  EOEPCA::OWS::OWSParameter*  (*parseFromFile)(const char*);
+  EOEPCA::OWS::OWSParameter*  (*parseFromMemory)(const char*, int);
   void (*releaseParameter)(EOEPCA::OWS::OWSParameter*);
 };
 

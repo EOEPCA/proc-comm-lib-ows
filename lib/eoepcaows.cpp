@@ -4,13 +4,13 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <iostream>
 
 #include "includes/parser.hpp"
 
 extern "C" long version() { return 1; }
 
-extern "C" void getParserName(char* buffer, int maxSize,
-                              EOEPCA::OWS::OWSParameter* parameter) {
+extern "C" void getParserName(char* buffer, int maxSize ) {
   auto parser = std::make_unique<EOEPCA::Parser>();
 
   int val = parser->getName().size();
@@ -20,11 +20,8 @@ extern "C" void getParserName(char* buffer, int maxSize,
   std::strncpy(buffer, parser->getName().c_str(), len);
 }
 
-extern "C" void parseFromFile(const char* fileName,
-                              EOEPCA::OWS::OWSParameter* parameter) {
 
-  parameter=new EOEPCA::OWS::OWSParameter();
-
+extern "C" EOEPCA::OWS::OWSParameter*  parseFromFile(const char* fileName) {
 
   auto parser = std::make_unique<EOEPCA::Parser>();
 
@@ -40,13 +37,27 @@ extern "C" void parseFromFile(const char* fileName,
     err.append(fileName);
     throw std::runtime_error(err);
   }
+
+
+  auto y=new  EOEPCA::OWS::OWSParameter();
+  y->setTitle("parseFromMemory");
+
+  return y;
+
 }
+
+extern "C" EOEPCA::OWS::OWSParameter* parseFromMemory(const char* xmlBuffer, int size) {
+  auto parser = std::make_unique<EOEPCA::Parser>();
+  parser->parseXml(xmlBuffer, size);
+
+  auto y=new  EOEPCA::OWS::OWSParameter();
+  y->setTitle("parseFromMemory");
+
+  return y;
+}
+
+
 
 extern "C" void releaseParameter(EOEPCA::OWS::OWSParameter* parameter) {
   delete parameter;
-}
-
-extern "C" void parseFromMemory(const char* xmlBuffer, int size) {
-  auto parser = std::make_unique<EOEPCA::Parser>();
-  parser->parseXml(xmlBuffer, size);
 }

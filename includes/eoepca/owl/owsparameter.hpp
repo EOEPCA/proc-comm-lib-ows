@@ -5,6 +5,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <iostream>
 
 namespace EOEPCA::OWS {
 
@@ -155,7 +156,9 @@ class OWSParameter final : public Descriptor {
   OWSParameter(const OWSParameter &) = delete;
   OWSParameter(OWSParameter &&) = delete;
 
-  ~OWSParameter() override = default;
+  ~OWSParameter() override{
+    std::cout  << "DELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETE\n";
+  }
 };
 }  // namespace EOEPCA::OWS
 #endif  // EOEPCAOWS_OWSPARAMETER_HPP
