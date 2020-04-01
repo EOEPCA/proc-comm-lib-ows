@@ -11,6 +11,45 @@ namespace EOEPCA {
 
 const std::string& Parser::getName() const { return name; }
 
+void parseBoundingBoxData(xmlNode* nodeBoundingBoxData) {
+  FOR(box, nodeBoundingBoxData) {
+    IF_XML_COMPARE(box->name, "Supported") {
+      FOR(crs, box) {
+        IF_XML_COMPARE(crs->name, "CRS") {
+          echo << "\t\t\tSupported: " << (char*)xmlNodeGetContent(crs) << "\n";
+        }
+      }
+    }
+    else IF_XML_COMPARE(box->name, "Default") {
+      if (box->children &&
+          !xmlStrcmp(box->children->name, (const xmlChar*)"CRS")) {
+        echo << "\t\t\tDefault: " << (char*)xmlNodeGetContent(box->children)
+             << "\n";
+      }
+    }
+  }
+}
+
+void parseLiteralData(xmlNode* nodeLiteralData) {
+  FOR(ldata, nodeLiteralData) {
+    echo << "\t\t" << ldata->name << "\n";
+    IS_CHECK(ldata, "AnyValue", XMLNS_WPS1) {}
+    else IS_CHECK(ldata, "AllowedValues", XMLNS_OWS) {
+      FOR(value, ldata) {
+        IS_CHECK(value, "Value", XMLNS_OWS) {
+          echo << "\t\t\tValue: " << (char*)xmlNodeGetContent(value) << "\n";
+        }
+      }
+    }
+    else IS_CHECK(ldata, "DataType", XMLNS_OWS) {
+      echo << "\t\t\tDataType: " << (char*)xmlNodeGetContent(ldata) << "\n";
+    }
+    else IS_CHECK(ldata, "DefaultValue", XMLNS_OWS) {
+      echo << "\t\t\tDefaultValue: " << (char*)xmlNodeGetContent(ldata) << "\n";
+    }
+  }
+}
+
 void parseInput(xmlNode* nodeInput) {
   echo << "*******************\n";
   xmlChar* minOccurs = xmlGetProp(nodeInput, (const xmlChar*)"minOccurs");
@@ -41,20 +80,16 @@ void parseInput(xmlNode* nodeInput) {
     }
 
     IF_XML_COMPARE(input->ns->href, XMLNS_WPS1) {
-      IS_CHECK(input, "LiteralData", XMLNS_WPS1) {
-        echo << "\t"
-             << "LITERALDATA \n";
-      }
-      else IS_CHECK(input, "BoundingBoxData", XMLNS_WPS1) {
-        echo << "\t"
-             << "BoundingBoxData \n";
+      IS_CHECK(input, "LiteralData", XMLNS_WPS1) { parseLiteralData(input); }
+      else IS_CHECK(input, "BoundingBoxDatas", XMLNS_WPS1) {
+        parseBoundingBoxData(input);
       }
       else {
         std::string err("Type ");
         err.append((char*)input->name);
 
         if (input->ns->href) {
-          err.append("with namespace ").append((char*)input->ns->href);
+          err.append(" with namespace ").append((char*)input->ns->href);
         }
 
         err.append(" not supported in this version!");
