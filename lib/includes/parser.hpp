@@ -1,6 +1,13 @@
 #ifndef EOEPCAOWS_PARSER_HPP
 #define EOEPCAOWS_PARSER_HPP
 
+
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
 #include <string>
 
 namespace EOEPCA {
@@ -18,6 +25,8 @@ class Parser {
  public:
 
   const std::string& getName() const;
+
+  int parseXml(const char *bufferXml, int size);
 };
 
 }  // namespace EOEPCA

@@ -1,16 +1,15 @@
 
 
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-
 #include <eoepca/owl/eoepcaows.hpp>
 #include <iostream>
 #include <memory>
 
 int main(int argc, const char** argv) {
+  if (argc == 1) {
+    std::cerr << "arg1: ows file path";
+    return 1;
+  }
+
   auto lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.so");
   if (!lib->IsValid()) {
     lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.dylib");
@@ -22,6 +21,11 @@ int main(int argc, const char** argv) {
   lib->getParserName(theName.get(), maxLen);
 
   std::cout << "LIB name: " << theName.get() << "\n";
+
+  std::cout << "Run: \n";
+
+  lib->parseFromFile(argv[1]);
+
 
   return 0;
 }

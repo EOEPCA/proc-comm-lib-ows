@@ -8,7 +8,11 @@ class EOEPCAows : protected mods::IModInterface {
  public:
   EOEPCAows() = delete;
   explicit EOEPCAows(const std::string& path)
-      : mods::IModInterface(path), version(nullptr), getParserName(nullptr) {
+      : mods::IModInterface(path),
+        version(nullptr),
+        getParserName(nullptr),
+        parseFromFile(nullptr),
+        parseFromMemory(nullptr) {
     if (isValid()) {
       version = (long (*)(void))dlsym(handle, "version");
       if (!version) {
@@ -16,7 +20,18 @@ class EOEPCAows : protected mods::IModInterface {
       }
 
       getParserName = (void (*)(char*, int))dlsym(handle, "getParserName");
-      if (!version) {
+      if (!getParserName) {
+        setValid(false);
+      }
+
+      parseFromFile = (void (*)(const char*))dlsym(handle, "parseFromFile");
+      if (!parseFromFile) {
+        setValid(false);
+      }
+
+      parseFromMemory =
+          (void (*)(const char*, int))dlsym(handle, "parseFromMemory");
+      if (!parseFromMemory) {
         setValid(false);
       }
     }
@@ -34,6 +49,8 @@ class EOEPCAows : protected mods::IModInterface {
  public:
   long (*version)(void);
   void (*getParserName)(char*, int);
+  void (*parseFromFile)(const char*);
+  void (*parseFromMemory)(const char*, int);
 };
 
 }  // namespace EOEPCA

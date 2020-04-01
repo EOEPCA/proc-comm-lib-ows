@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:owc="http://www.opengis.net/owc/1.0" xmlns="http://www.w3.org/2005/Atom" xmlns:terradue="http://www.terradue.com">
+    <entry>
+        <identifier xmlns="http://purl.org/dc/elements/1.1/">application_package_dlr_s2_preproc</identifier>
+        <title type="text">Application package for DLR Sentinel-2 pre-processing </title>
+        <summary type="html">Application package DLR Sentinel-2 pre-processing</summary>
+        <author>
+            <name>Terradue</name>
+            <uri>https://www.terradue.com</uri>
+            <email>support@terradue.com</email>
+        </author>
+        <owc:offering xmlns:owc="http://www.opengis.net/owc/1.0" code="http://www.opengis.net/spec/owc-atom/1.0/req/wps">
+            <owc:content type="application/vnd.docker.distribution.manifest.v1+json" href="docker-co.terradue.com/dlr-s2-preproc:0.0.1.2"/>
+            <owc:content type="application/cwl" href="https://store.terradue.com/api/ec-better/_applications/ec-better/dlr-s2-preproc/0.0.1.2/dlr-s2-preproc.0.0.1.2-application.cwl"/>
+            <owc:operation code="DescribeProcess">
+                <owc:result type="text/xml">
+                    <ProcessDescription xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns="http://www.w3.org/2005/Atom" processVersion="1.12" storeSupported="true" statusSupported="true">
+                        <ows:Identifier>dlr-s2-preproc</ows:Identifier>
+                        <ows:Title>DLR Sentinel-2 pre-processing</ows:Title>
+                        <ows:Abstract>DLR Sentinel-2 pre-processing</ows:Abstract>
+                        <DataInputs>
+
+                            <wps:Input minOccurs="1">
+                                <ows:Identifier>input_reference</ows:Identifier>
+                                <ows:Title>S2 references</ows:Title>
+                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references</ows:Abstract>
+                                <wps:LiteralData>
+                                    <ows:DataType>string</ows:DataType>
+                                    <ows:AnyValue/>
+                                    <wps:DefaultValue/>
+                                </wps:LiteralData>
+                            </wps:Input>
+
+                            <wps:Input minOccurs="1">
+                                <ows:Identifier>input_reference</ows:Identifier>
+                                <ows:Title>S2 references</ows:Title>
+                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references</ows:Abstract>
+                                <wps:BoundingBoxData>
+                                    <ows:DataType>string</ows:DataType>
+                                    <ows:AnyValue/>
+                                    <wps:DefaultValue/>
+                                </wps:BoundingBoxData>
+                            </wps:Input>
+
+
+                        </DataInputs>
+                        <ProcessOutputs>
+                            <Output>
+                                <ows:Identifier>result_osd</ows:Identifier>
+                                <ows:Title>OpenSearch Description to the Results</ows:Title>
+                                <ows:Abstract>OpenSearch Description to the Results</ows:Abstract>
+                                <ComplexOutput>
+                                    <Default>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml</MimeType>
+                                        </Format>
+                                    </Default>
+                                    <Supported>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml</MimeType>
+                                        </Format>
+                                    </Supported>
+                                </ComplexOutput>
+                            </Output>
+                        </ProcessOutputs>
+                    </ProcessDescription>
+                </owc:result>
+            </owc:operation>
+        </owc:offering>
+    </entry>
+
+
+</feed>
+
