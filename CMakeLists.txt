@@ -23,7 +23,7 @@ SET(MODS_LIBS
 
 SET(INCLUDE_SRC
 		includes/eoepca/IMod.hpp
-		includes/eoepca/owl/eoepcaows.hpp)
+		includes/eoepca/owl/eoepcaows.hpp includes/eoepca/owl/owsparameter.hpp)
 
 SET(LIB_INCLUDE
 

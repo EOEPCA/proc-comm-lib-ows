@@ -11,6 +11,10 @@ namespace EOEPCA {
 
 const std::string& Parser::getName() const { return name; }
 
+
+
+///Users/rdirienzo/Project/t2pc/src/t2serverwps/kungfu-wps/schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd?#117
+
 void parseBoundingBoxData(xmlNode* nodeBoundingBoxData) {
   FOR(box, nodeBoundingBoxData) {
     IF_XML_COMPARE(box->name, "Supported") {

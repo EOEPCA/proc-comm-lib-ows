@@ -1,6 +1,10 @@
 
 
+
 #include <eoepca/owl/eoepcaows.hpp>
+
+#include <eoepca/owl/owsparameter.hpp>
+
 #include <iostream>
 #include <memory>
 
@@ -24,7 +28,11 @@ int main(int argc, const char** argv) {
 
   std::cout << "Run: \n";
 
-  lib->parseFromFile(argv[1]);
+  EOEPCA::OWS::OWSParameter* p{nullptr};
+
+  lib->parseFromFile(argv[1],p);
+
+  delete p;
 
 
   return 0;

@@ -1,6 +1,7 @@
 #ifndef EOEPCAOWS_PARSER_HPP
 #define EOEPCAOWS_PARSER_HPP
 
+#include <eoepca/owl/owsparameter.hpp>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
