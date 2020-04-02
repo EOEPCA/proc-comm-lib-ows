@@ -19,13 +19,13 @@ class Descriptor {
 
  public:
   Descriptor() = default;
-  Descriptor(const Descriptor &other)
+  Descriptor(const Descriptor &other) noexcept(false)
       : identifier(other.identifier),
         title(other.title),
         version(other.version),
         abstract(other.abstract) {}
 
-  Descriptor(Descriptor &&other)
+  Descriptor(Descriptor &&other) noexcept(false)
       : identifier(std::move(other.identifier)),
         title(std::move(other.title)),
         abstract(std::move(other.abstract)),
@@ -157,19 +157,114 @@ class Param : public Descriptor, public Occurs {
     return *this;
   }
 
+  Param &operator<<(const Descriptor &descriptor) {
+    setIdentifier(descriptor.getIdentifier());
+    setTitle(descriptor.getTitle());
+    setAbstract(descriptor.getAbstract());
+
+    return *this;
+  }
+
+  Param &operator<<(const Occurs &occurs) {
+    setMinOccurs(occurs.getMinOccurs());
+    setMaxOccurs(occurs.getMaxOccurs());
+    return *this;
+  }
+
   ~Param() override = default;
 
   virtual std::string getType() = 0;
 };
 
-class LiteralData final : public Param {
- private:
+class Supported {
+  std::list<std::string> supported{};
+  std::string defaultValue{""};
+
  public:
-  std::string getType() override { return std::string("LiteralData"); }
+  Supported() = default;
+
+  Supported(const Supported &other) : defaultValue(other.defaultValue) {
+    for (auto &s : other.supported) {
+      supported.emplace_back(s);
+    }
+  }
+
+  Supported(Supported &&other) noexcept(false)
+      : defaultValue(std::move(other.defaultValue)) {
+    for (auto &s : other.supported) {
+      supported.emplace_back(s);
+    }
+    other.supported.clear();
+  }
+
+  virtual ~Supported() = default;
+
+ public:
+  void addSupportedValues(std::string value) {
+    supported.emplace_back(std::move(value));
+  }
+
+  void setDefault(std::string value) { defaultValue = std::move(value); }
 };
 
-class BoundingBoxData final : public Param {
- private:
+class Values {
+  std::list<std::string> allowedValues{};
+  std::string defaultValue{""};
+
+ public:
+  Values() = default;
+
+  Values(const Values &other) : defaultValue(other.defaultValue) {
+    for (auto &s : other.allowedValues) {
+      allowedValues.emplace_back(s);
+    }
+  }
+
+  Values(Values &&other) noexcept(false)
+      : defaultValue(std::move(other.defaultValue)) {
+    for (auto &s : other.allowedValues) {
+      allowedValues.emplace_back(s);
+    }
+    other.allowedValues.clear();
+  }
+
+  virtual ~Values() = default;
+
+ public:
+  void addAllowedValues(std::string value) {
+    allowedValues.emplace_back(std::move(value));
+  }
+
+  void setDefault(std::string value) { defaultValue = std::move(value); }
+};
+
+class LiteralData final : public Param, public Values {
+  std::string dataType{"string"};
+
+ public:
+  //  LiteralData():Param(),Values(){}
+
+  LiteralData() = default;
+
+  LiteralData(const LiteralData &) = delete;
+  LiteralData(LiteralData &&) = delete;
+
+  ~LiteralData() = default;
+
+ public:
+  std::string getType() override { return std::string("LiteralData"); }
+  void setDataType(std::string data) { dataType = std::move(data); }
+};
+
+class BoundingBoxData final : public Param, public Supported {
+ public:
+  BoundingBoxData() = default;
+
+  BoundingBoxData(const LiteralData &) = delete;
+  BoundingBoxData(BoundingBoxData &&) = delete;
+
+  ~BoundingBoxData() = default;
+
  public:
   std::string getType() override { return std::string("BoundingBoxData"); }
 };
@@ -181,12 +276,12 @@ class ComplexData final : public Param {
 };
 
 struct Content {
-  Content(std::string pCode, std::string pHref)
-      : code(std::move(pCode)), href(std::move(pHref)) {}
-
   std::string href{""};
   std::string code{""};
   std::string tag{""};
+
+  Content(std::string pCode, std::string pHref)
+      : code(std::move(pCode)), href(std::move(pHref)) {}
 };
 
 class OWSParameter final : public Descriptor {

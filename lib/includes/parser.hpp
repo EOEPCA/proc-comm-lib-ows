@@ -27,6 +27,7 @@ class Parser {
 
   const std::string& getName() const;
 
+  [[nodiscard]]
   OWS::OWSParameter* parseXml(const char *bufferXml, int size);
 };
 

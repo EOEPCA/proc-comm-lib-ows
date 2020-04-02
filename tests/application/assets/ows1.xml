@@ -63,7 +63,7 @@
                                     [lon_min,lat_min,lon_max,lat_max]
                                 </ows:Abstract>
                                 <ows:Identifier>SubsetBoundingBox</ows:Identifier>
-                                <wps:BoundingBoxDatas>
+                                <wps:BoundingBoxData>
                                     <Supported>
 
                                         <CRS>urn:ogc:def:crs:EPSG:6.6:4326</CRS>
@@ -74,8 +74,47 @@
                                     <Default>
                                         <CRS>CRS = urn:ogc:def:crs:EPSG:6.6:4326</CRS>
                                     </Default>
-                                </wps:BoundingBoxDatas>
+                                </wps:BoundingBoxData>
                             </wps:Input>
+
+
+
+                            <wps:Input minOccurs="1" maxOccurs="1">
+                                <ows:Title>Subset Bounding Box for Unwrapping</ows:Title>
+                                <ows:Abstract>Define the area of interest for the Phase Unwrapping processing
+                                    [lon_min,lat_min,lon_max,lat_max]
+                                </ows:Abstract>
+                                <ows:Identifier>SubsetBoundingBox</ows:Identifier>
+                                <ComplexData maximumMegabytes="22323">
+                                    <Default>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml</MimeType>
+                                            <Encoding>sadasda</Encoding>
+                                            <Schema>dsadasdas</Schema>
+                                        </Format>
+                                    </Default>
+                                    <Supported>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml</MimeType>
+                                            <Encoding>sadasda</Encoding>
+                                            <Schema>dsadasdas</Schema>
+                                        </Format>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml2</MimeType>
+                                            <Encoding>sadasda</Encoding>
+                                            <Schema>dsadasdas</Schema>
+                                        </Format>
+                                        <Format>
+                                            <MimeType>application/opensearchdescription+xml3</MimeType>
+                                            <Encoding>sadasda</Encoding>
+                                            <Schema>dsadasdas</Schema>
+                                        </Format>
+                                    </Supported>
+                                </ComplexData>
+                            </wps:Input>
+
+
+
 
 
                         </DataInputs>

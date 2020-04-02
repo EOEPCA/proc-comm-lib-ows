@@ -5,7 +5,6 @@
 #include <memory>
 #include <optional>
 
-
 #include "includes/macro.hpp"
 #define echo std::cout
 
@@ -15,48 +14,64 @@ const std::string& Parser::getName() const { return name; }
 
 /// Users/rdirienzo/Project/t2pc/src/t2serverwps/kungfu-wps/schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd?#117
 
-void parseBoundingBoxData(xmlNode* nodeBoundingBoxData) {
+[[nodiscard]] std::unique_ptr<OWS::BoundingBoxData> parseBoundingBoxData(
+    xmlNode* nodeBoundingBoxData) {
+  auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
+
   FOR(box, nodeBoundingBoxData) {
     IF_XML_COMPARE(box->name, "Supported") {
       FOR(crs, box) {
         IF_XML_COMPARE(crs->name, "CRS") {
-          echo << "\t\t\tSupported: " << (char*)xmlNodeGetContent(crs) << "\n";
+          boundingBoxData->addSupportedValues(
+              std::string(CHAR_BAD_CAST xmlNodeGetContent(crs)));
         }
       }
     }
     else IF_XML_COMPARE(box->name, "Default") {
       if (box->children &&
           !xmlStrcmp(box->children->name, (const xmlChar*)"CRS")) {
-        echo << "\t\t\tDefault: " << (char*)xmlNodeGetContent(box->children)
-             << "\n";
+        boundingBoxData->setDefault(
+            std::string(CHAR_BAD_CAST xmlNodeGetContent(box->children)));
       }
     }
   }
+
+  return std::move(boundingBoxData);
 }
 
-void parseLiteralData(xmlNode* nodeLiteralData) {
+[[nodiscard]] std::unique_ptr<OWS::LiteralData> parseLiteralData(
+    xmlNode* nodeLiteralData) {
+  auto literData = std::make_unique<OWS::LiteralData>();
+
   FOR(ldata, nodeLiteralData) {
     echo << "\t\t" << ldata->name << "\n";
     IS_CHECK(ldata, "AnyValue", XMLNS_WPS1) {}
     else IS_CHECK(ldata, "AllowedValues", XMLNS_OWS) {
       FOR(value, ldata) {
         IS_CHECK(value, "Value", XMLNS_OWS) {
-          echo << "\t\t\tValue: " << (char*)xmlNodeGetContent(value) << "\n";
+          literData->addAllowedValues(
+              std::string(CHAR_BAD_CAST xmlNodeGetContent(value)));
         }
       }
     }
     else IS_CHECK(ldata, "DataType", XMLNS_OWS) {
-      echo << "\t\t\tDataType: " << (char*)xmlNodeGetContent(ldata) << "\n";
+      literData->setDataType(
+          std::string(CHAR_BAD_CAST xmlNodeGetContent(ldata)));
     }
     else IS_CHECK(ldata, "DefaultValue", XMLNS_OWS) {
-      echo << "\t\t\tDefaultValue: " << (char*)xmlNodeGetContent(ldata) << "\n";
+      literData->setDefault(
+          std::string(CHAR_BAD_CAST xmlNodeGetContent(ldata)));
     }
   }
+
+  return std::move(literData);
 }
 
 void parseInput(xmlNode* nodeInput,
                 std::unique_ptr<OWS::OWSParameter>& ptrParams) {
   // ptr definitions
+
+  std::unique_ptr<OWS::Param> param{nullptr};
 
   auto ptrOccurs = std::make_unique<OWS::Occurs>();
   auto ptrDescriptor = std::make_unique<OWS::Descriptor>();
@@ -90,12 +105,12 @@ void parseInput(xmlNode* nodeInput,
 
     IF_XML_COMPARE(input->ns->href, XMLNS_WPS1) {
       IS_CHECK(input, "LiteralData", XMLNS_WPS1) {
-        //get literal data
-        parseLiteralData(input);
+        // get literal data
+        param.reset(parseLiteralData(input).release());
       }
-      else IS_CHECK(input, "BoundingBoxDatas", XMLNS_WPS1) {
-        //get literal data
-        parseBoundingBoxData(input);
+      else IS_CHECK(input, "BoundingBoxData", XMLNS_WPS1) {
+        // get literal data
+        param.reset(parseBoundingBoxData(input).release());
       }
       else {
         std::string err("Type ");
@@ -110,7 +125,11 @@ void parseInput(xmlNode* nodeInput,
       }
     }
   }
-  echo << "*******************\n\n\n";
+
+  if (param) {
+    *param << *ptrDescriptor << *ptrOccurs;
+    ptrParams->addInput(param.release());
+  }
 }
 
 void parseOutput(xmlNode* nodeOutput) {}
@@ -160,7 +179,6 @@ void parseOffering(xmlNode* offering_node,
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"code");
       if (code) {
         IF_XML_COMPARE(code, "DescribeProcess") {
-          echo << "IF_XML_COMPARE IS_OPERATION TYPE: " << (char*)code << "\n";
           if (inner_cur_node->children) {
             FOR(desc, inner_cur_node->children) {
               IS_CHECK(desc, "ProcessDescription", XMLNS_ATOM) {
