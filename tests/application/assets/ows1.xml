@@ -23,7 +23,7 @@
                                         processVersion="1.12" storeSupported="true" statusSupported="true">
                         <ows:Identifier>dlr-s2-preproc</ows:Identifier>
                         <ows:Title>DLR Sentinel-2 pre-processing</ows:Title>
-                        <ows:Abstract>DLR Sentinel-2 pre-processing</ows:Abstract>
+                        <ows:Abstract>ABSTRACT DLR Sentinel-2 pre-processing</ows:Abstract>
                         <DataInputs>
 
                             <wps:Input minOccurs="1">

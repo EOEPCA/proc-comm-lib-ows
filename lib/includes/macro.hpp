@@ -15,6 +15,8 @@
 #define IF_XML_COMPARE(X1,CHAR) if (!xmlStrcmp(X1, (const xmlChar *) CHAR))
 #define OFFERING_CODE "http://www.opengis.net/tb13/eoc/wpsProcessOffering"
 
+#define CHAR_BAD_CAST (char*)
+
 #define IS_FEED(D) if (!xmlStrcmp(D->name, (const xmlChar *) "feed") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_ATOM))
 #define IS_OFFERING(D) if (!xmlStrcmp(D->name, (const xmlChar *) "offering") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_OWC))
 #define IS_OFFERING_CODE(D) if (D != NULL && !xmlStrcmp(D, (const xmlChar *) OFFERING_CODE))

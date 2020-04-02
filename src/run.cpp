@@ -2,6 +2,7 @@
 
 #include <eoepca/owl/eoepcaows.hpp>
 #include <eoepca/owl/owsparameter.hpp>
+#include <functional>
 #include <iostream>
 #include <memory>
 
@@ -22,15 +23,25 @@ int main(int argc, const char** argv) {
   lib->getParserName(theName.get(), maxLen);
 
   std::cout << "LIB name: " << theName.get() << "\n";
-
   std::cout << "Run: \n";
 
-  auto thePatam = lib->parseFromFile(argv[1]);
+  std::unique_ptr<EOEPCA::OWS::OWSParameter,
+                  std::function<void(EOEPCA::OWS::OWSParameter*)> >
+      theParams(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
-  std::cout << "thePatam: " << thePatam->getTitle() <<"\n";
+  if (theParams) {
+    std::cout << "********************************\n";
+    std::cout << theParams->getPackageIdentifier() << "\n";
+
+    std::cout << theParams->getIdentifier() << "\n";
+    std::cout << theParams->getTitle() << "\n";
+    std::cout << theParams->getAbstract() << "\n";
 
 
-  delete thePatam;
+    for (auto& y : theParams->getContents()) {
+      std::cout << "\t" << y.code << " " << y.href << "\n";
+    }
+  }
 
   return 0;
 }
