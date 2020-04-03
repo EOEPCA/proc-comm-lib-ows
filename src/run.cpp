@@ -9,7 +9,6 @@
 #include <string>
 
 int main(int argc, const char** argv) {
-
   if (argc == 1) {
     std::cerr << "arg1: ows file path";
     return 1;
@@ -28,26 +27,26 @@ int main(int argc, const char** argv) {
   std::cout << "LIB name: " << theName.get() << "\n";
   std::cout << "Run: \n";
 
-  std::unique_ptr<EOEPCA::OWS::OWSProcessDescription,
-                  std::function<void(EOEPCA::OWS::OWSProcessDescription*)>>
+  std::unique_ptr<EOEPCA::OWS::OWSEntry,
+                  std::function<void(EOEPCA::OWS::OWSEntry*)>>
       theParams(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
   if (theParams) {
     std::cout << "********************************\n";
     std::cout << theParams->getPackageIdentifier() << "\n";
 
-    std::cout << theParams->getIdentifier() << "\n";
-    std::cout << theParams->getTitle() << "\n";
-    std::cout << theParams->getAbstract() << "\n";
+    for (auto& off : theParams->getOfferings()) {
+      std::cout << off->getIdentifier() << "\n";
+      std::cout << off->getTitle() << "\n";
+      std::cout << off->getAbstract() << "\n";
 
-    for (auto& y : theParams->getContents()) {
-      std::cout << "\t" << y.code << " " << y.href << "\n";
+      for (auto& y : off->getContents()) {
+        std::cout << "\t" << y.code << " " << y.href << "\n";
+      }
+
+      std::cout << "theParams SIZE INPUT: " << off->getInputs().size() << "\n";
+      std::cout << "theParams SIZE OUTPUT: " << off->getOutputs().size();
     }
-
-    std::cout << "theParams SIZE INPUT: " <<  theParams->getInputs().size()<< "\n";
-    std::cout << "theParams SIZE OUTPUT: " <<  theParams->getOutputs().size();
-
-
   }
 
   return 0;

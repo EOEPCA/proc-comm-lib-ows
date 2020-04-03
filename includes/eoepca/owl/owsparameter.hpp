@@ -327,7 +327,7 @@ class ComplexData final : public Param {
 
   void moveDefaultSupported(std::unique_ptr<Format> &format) {
     if (format) {
-      defaultSupported.reset(format.release());
+      defaultSupported = std::move(format);
     }
   }
 
@@ -355,28 +355,20 @@ struct Content {
       : code(std::move(pCode)), href(std::move(pHref)) {}
 };
 
-class OWSProcessDescription final : public Descriptor {
-  std::string packageIdentifier{""};
-
+class OWSOffering final : public Descriptor {
   std::list<std::unique_ptr<Param>> inputs;
   std::list<std::unique_ptr<Param>> outputs;
 
   std::list<Content> contents{};
 
  public:
-  OWSProcessDescription() = default;
-  OWSProcessDescription(const OWSProcessDescription &) = delete;
-  OWSProcessDescription(OWSProcessDescription &&) = delete;
+  OWSOffering() = default;
+  OWSOffering(const OWSOffering &) = delete;
+  OWSOffering(OWSOffering &&) = delete;
 
-  ~OWSProcessDescription() override = default;
+  ~OWSOffering() override = default;
 
  public:
-  void setPackageIdentifier(std::string pPackageIdentifier) {
-    OWSProcessDescription::packageIdentifier = std::move(pPackageIdentifier);
-  }
-
-  const std::string &getPackageIdentifier() const { return packageIdentifier; }
-
   const std::list<Content> &getContents() const { return contents; }
 
   void addInput(Param *param) {
@@ -393,7 +385,7 @@ class OWSProcessDescription final : public Descriptor {
 
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {
-      contents.emplace_back(code, href);
+      contents.emplace_back(std::move(code), std::move(href));
     }
   }
 
@@ -403,7 +395,34 @@ class OWSProcessDescription final : public Descriptor {
   }
 };
 
-class Ows {};
+class OWSEntry {
+  std::list<std::unique_ptr<OWSOffering>> offerings{};
+  std::string packageIdentifier{""};
+
+ public:
+  OWSEntry() = default;
+  OWSEntry(const OWSEntry &) = delete;
+  OWSEntry(OWSEntry &&) = delete;
+
+  ~OWSEntry() = default;
+
+ public:
+  void setPackageIdentifier(std::string pPackageIdentifier) {
+    OWSEntry::packageIdentifier = std::move(pPackageIdentifier);
+  }
+
+  const std::string &getPackageIdentifier() const { return packageIdentifier; }
+
+  void moveAddOffering(std::unique_ptr<OWSOffering> &offering) {
+    if (offering) {
+      offerings.emplace_back(std::move(offering));
+    }
+  }
+
+  const std::list<std::unique_ptr<OWSOffering>> &getOfferings() const {
+    return offerings;
+  }
+};
 
 }  // namespace EOEPCA::OWS
 #endif  // EOEPCAOWS_OWSPARAMETER_HPP

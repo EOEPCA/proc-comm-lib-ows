@@ -28,7 +28,7 @@ class Parser {
   const std::string& getName() const;
 
   [[nodiscard]]
-  OWS::OWSProcessDescription* parseXml(const char *bufferXml, int size);
+  OWS::OWSEntry* parseXml(const char *bufferXml, int size);
 };
 
 }  // namespace EOEPCA

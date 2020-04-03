@@ -126,7 +126,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
                  OBJECT_NODE objectNode,
-                 std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
+                 std::unique_ptr<OWS::OWSOffering>& ptrParams) {
   std::unique_ptr<OWS::Param> param{nullptr};
 
   auto ptrOccurs = std::make_unique<OWS::Occurs>();
@@ -176,7 +176,7 @@ void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
 void parseOutput(xmlNode* nodeOutput) {}
 
 void parseProcessDescription(xmlNode* processDescription,
-                             std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
+                             std::unique_ptr<OWS::OWSOffering>& ptrParams) {
   MAP_PARSER mapParser{};
   mapParser.emplace(FNCMAP(LiteralData, parseLiteralData));
   mapParser.emplace(FNCMAP(BoundingBoxData, parseBoundingBoxData));
@@ -216,7 +216,7 @@ void parseProcessDescription(xmlNode* processDescription,
 }
 
 void parseOffering(xmlNode* offering_node,
-                   std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
+                   std::unique_ptr<OWS::OWSOffering>& ptrParams) {
   FOR(inner_cur_node, offering_node) {
     if (IS_CHECK(inner_cur_node, "content", XMLNS_OWC)) {
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
@@ -241,24 +241,26 @@ void parseOffering(xmlNode* offering_node,
   }
 }
 
-void parseEntry(xmlNode* entry_node,
-                std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
+void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
   FOR(inner_cur_node, entry_node) {
     if (inner_cur_node->type == XML_COMMENT_NODE) {
       continue;
     } else if (inner_cur_node->type == XML_ELEMENT_NODE) {
       if (IS_CHECK(inner_cur_node, "identifier", XMLNS_PURL)) {
         // set /entry/identifier/
-        ptrParams->setPackageIdentifier(
+        owsEntry->setPackageIdentifier(
             std::string((char*)xmlNodeGetContent(inner_cur_node)));
+
       } else if (IS_CHECK(inner_cur_node, "offering", XMLNS_OWC)) {
+        auto ptrParams = std::make_unique<OWS::OWSOffering>();
         parseOffering(inner_cur_node, ptrParams);
+        owsEntry->moveAddOffering(ptrParams);
       }
     }
   }
 }
 
-OWS::OWSProcessDescription* Parser::parseXml(const char* bufferXml, int size) {
+OWS::OWSEntry* Parser::parseXml(const char* bufferXml, int size) {
   int ret = 0;
   xmlDoc* doc = nullptr;
   xmlNode* root_element = nullptr;
@@ -269,7 +271,7 @@ OWS::OWSProcessDescription* Parser::parseXml(const char* bufferXml, int size) {
   std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> pDoc{
       xmlReadMemory(bufferXml, size, nullptr, nullptr, option), &xmlFreeDoc};
 
-  auto PARAMETERs = std::make_unique<OWS::OWSProcessDescription>();
+  auto owsEntry = std::make_unique<OWS::OWSEntry>();
 
   try {
     if (pDoc == nullptr) {
@@ -289,7 +291,7 @@ OWS::OWSProcessDescription* Parser::parseXml(const char* bufferXml, int size) {
                 continue;
               } else if (inner_entry_node->type == XML_ELEMENT_NODE) {
                 if (IS_CHECK(inner_entry_node, "entry", XMLNS_ATOM)) {
-                  parseEntry(inner_entry_node, PARAMETERs);
+                  parseEntry(inner_entry_node, owsEntry);
                 }
               }
             }
@@ -300,15 +302,15 @@ OWS::OWSProcessDescription* Parser::parseXml(const char* bufferXml, int size) {
 
   } catch (std::runtime_error& err) {
     std::cerr << err.what() << "\n";
-    PARAMETERs.reset(nullptr);
+    owsEntry.reset(nullptr);
   } catch (...) {
     std::cerr << "CATCH!!!\n";
-    PARAMETERs.reset(nullptr);
+    owsEntry.reset(nullptr);
   }
 
   xmlCleanupParser();
 
-  return PARAMETERs.release();
+  return owsEntry.release();
 }
 
 Parser::~Parser() {}
