@@ -27,7 +27,7 @@ class EOEPCAows : protected mods::IModInterface {
         return;
       }
 
-      parseFromFile = (EOEPCA::OWS::OWSParameter*  (*)(const char*))dlsym(
+      parseFromFile = (EOEPCA::OWS::OWSProcessDescription *  (*)(const char*))dlsym(
           handle, "parseFromFile");
       if (!parseFromFile) {
         setValid(false);
@@ -35,14 +35,14 @@ class EOEPCAows : protected mods::IModInterface {
       }
 
       parseFromMemory =
-          (EOEPCA::OWS::OWSParameter*  (*)(const char*, int))dlsym(
+          (EOEPCA::OWS::OWSProcessDescription *  (*)(const char*, int))dlsym(
               handle, "parseFromMemory");
       if (!parseFromMemory) {
         setValid(false);
         return;
       }
 
-      releaseParameter = (void (*)(EOEPCA::OWS::OWSParameter*))dlsym(
+      releaseParameter = (void (*)(EOEPCA::OWS::OWSProcessDescription*))dlsym(
           handle, "releaseParameter");
       if (!releaseParameter) {
         setValid(false);
@@ -63,9 +63,9 @@ class EOEPCAows : protected mods::IModInterface {
  public:
   long (*version)(void);
   void (*getParserName)(char*, int);
-  EOEPCA::OWS::OWSParameter*  (*parseFromFile)(const char*);
-  EOEPCA::OWS::OWSParameter*  (*parseFromMemory)(const char*, int);
-  void (*releaseParameter)(EOEPCA::OWS::OWSParameter*);
+  EOEPCA::OWS::OWSProcessDescription*  (*parseFromFile)(const char*);
+  EOEPCA::OWS::OWSProcessDescription*  (*parseFromMemory)(const char*, int);
+  void (*releaseParameter)(EOEPCA::OWS::OWSProcessDescription*);
 };
 
 }  // namespace EOEPCA

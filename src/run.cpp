@@ -28,8 +28,8 @@ int main(int argc, const char** argv) {
   std::cout << "LIB name: " << theName.get() << "\n";
   std::cout << "Run: \n";
 
-  std::unique_ptr<EOEPCA::OWS::OWSParameter,
-                  std::function<void(EOEPCA::OWS::OWSParameter*)>>
+  std::unique_ptr<EOEPCA::OWS::OWSProcessDescription,
+                  std::function<void(EOEPCA::OWS::OWSProcessDescription*)>>
       theParams(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
   if (theParams) {

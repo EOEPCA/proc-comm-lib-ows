@@ -355,7 +355,7 @@ struct Content {
       : code(std::move(pCode)), href(std::move(pHref)) {}
 };
 
-class OWSParameter final : public Descriptor {
+class OWSProcessDescription final : public Descriptor {
   std::string packageIdentifier{""};
 
   std::list<std::unique_ptr<Param>> inputs;
@@ -364,15 +364,15 @@ class OWSParameter final : public Descriptor {
   std::list<Content> contents{};
 
  public:
-  OWSParameter() = default;
-  OWSParameter(const OWSParameter &) = delete;
-  OWSParameter(OWSParameter &&) = delete;
+  OWSProcessDescription() = default;
+  OWSProcessDescription(const OWSProcessDescription &) = delete;
+  OWSProcessDescription(OWSProcessDescription &&) = delete;
 
-  ~OWSParameter() override = default;
+  ~OWSProcessDescription() override = default;
 
  public:
   void setPackageIdentifier(std::string pPackageIdentifier) {
-    OWSParameter::packageIdentifier = std::move(pPackageIdentifier);
+    OWSProcessDescription::packageIdentifier = std::move(pPackageIdentifier);
   }
 
   const std::string &getPackageIdentifier() const { return packageIdentifier; }

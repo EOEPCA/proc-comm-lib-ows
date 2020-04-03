@@ -20,7 +20,7 @@ extern "C" void getParserName(char* buffer, int maxSize) {
   std::strncpy(buffer, parser->getName().c_str(), len);
 }
 
-extern "C" EOEPCA::OWS::OWSParameter* parseFromFile(const char* fileName) {
+extern "C" EOEPCA::OWS::OWSProcessDescription* parseFromFile(const char* fileName) {
   auto parser = std::make_unique<EOEPCA::Parser>();
 
   std::ifstream infile(fileName);
@@ -37,12 +37,12 @@ extern "C" EOEPCA::OWS::OWSParameter* parseFromFile(const char* fileName) {
   }
 }
 
-extern "C" EOEPCA::OWS::OWSParameter* parseFromMemory(const char* xmlBuffer,
+extern "C" EOEPCA::OWS::OWSProcessDescription* parseFromMemory(const char* xmlBuffer,
                                                       int size) {
   auto parser = std::make_unique<EOEPCA::Parser>();
   return parser->parseXml(xmlBuffer, size);
 }
 
-extern "C" void releaseParameter(EOEPCA::OWS::OWSParameter* parameter) {
+extern "C" void releaseParameter(EOEPCA::OWS::OWSProcessDescription* parameter) {
   delete parameter;
 }

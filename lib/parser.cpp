@@ -126,7 +126,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
                  OBJECT_NODE objectNode,
-                 std::unique_ptr<OWS::OWSParameter>& ptrParams) {
+                 std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   std::unique_ptr<OWS::Param> param{nullptr};
 
   auto ptrOccurs = std::make_unique<OWS::Occurs>();
@@ -176,7 +176,7 @@ void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
 void parseOutput(xmlNode* nodeOutput) {}
 
 void parseProcessDescription(xmlNode* processDescription,
-                             std::unique_ptr<OWS::OWSParameter>& ptrParams) {
+                             std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   MAP_PARSER mapParser{};
   mapParser.emplace(FNCMAP(LiteralData, parseLiteralData));
   mapParser.emplace(FNCMAP(BoundingBoxData, parseBoundingBoxData));
@@ -216,7 +216,7 @@ void parseProcessDescription(xmlNode* processDescription,
 }
 
 void parseOffering(xmlNode* offering_node,
-                   std::unique_ptr<OWS::OWSParameter>& ptrParams) {
+                   std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   FOR(inner_cur_node, offering_node) {
     if (IS_CHECK(inner_cur_node, "content", XMLNS_OWC)) {
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
@@ -242,7 +242,7 @@ void parseOffering(xmlNode* offering_node,
 }
 
 void parseEntry(xmlNode* entry_node,
-                std::unique_ptr<OWS::OWSParameter>& ptrParams) {
+                std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   FOR(inner_cur_node, entry_node) {
     if (inner_cur_node->type == XML_COMMENT_NODE) {
       continue;
@@ -258,7 +258,7 @@ void parseEntry(xmlNode* entry_node,
   }
 }
 
-OWS::OWSParameter* Parser::parseXml(const char* bufferXml, int size) {
+OWS::OWSProcessDescription* Parser::parseXml(const char* bufferXml, int size) {
   int ret = 0;
   xmlDoc* doc = nullptr;
   xmlNode* root_element = nullptr;
@@ -269,9 +269,7 @@ OWS::OWSParameter* Parser::parseXml(const char* bufferXml, int size) {
   std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> pDoc{
       xmlReadMemory(bufferXml, size, nullptr, nullptr, option), &xmlFreeDoc};
 
-  auto PARAMETERs = std::make_unique<OWS::OWSParameter>();
-
-  PARAMETERs->setTitle("THE TEST TITLE");
+  auto PARAMETERs = std::make_unique<OWS::OWSProcessDescription>();
 
   try {
     if (pDoc == nullptr) {
