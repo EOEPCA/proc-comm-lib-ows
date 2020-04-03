@@ -396,6 +396,11 @@ class OWSParameter final : public Descriptor {
       contents.emplace_back(code, href);
     }
   }
+
+  const std::list<std::unique_ptr<Param>> &getInputs() const { return inputs; }
+  const std::list<std::unique_ptr<Param>> &getOutputs() const {
+    return outputs;
+  }
 };
 
 class Ows {};

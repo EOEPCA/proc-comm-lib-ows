@@ -34,5 +34,13 @@
 #define IS_ENTRYIDENTIFIER(D) if (!xmlStrcmp(D->name, (const xmlChar *) "identifier") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_PURL))
 #define IS_PARSERDESCRIPTOR(D) if (!xmlStrcmp(D->name, (const xmlChar *) "ProcessDescription") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_ATOM))
 
+//if (IS_INPUT(input, XMLNS_WPS1, "LiteralData")) {
+//param = parseLiteralData(input);
+//} else if (IS_INPUT(input, XMLNS_WPS1, "BoundingBoxData")) {
+//param = parseBoundingBoxData(input);
+//} else if (IS_INPUT(input, XMLNS_WPS1, "ComplexData")) {
+//param = parseComplexData(input);
+//}
+
 
 #endif  // EOEPCAOWS_MACRO_HPP

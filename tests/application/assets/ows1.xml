@@ -115,6 +115,7 @@
 
                         </DataInputs>
                         <ProcessOutputs>
+
                             <Output>
                                 <ows:Identifier>result_osd</ows:Identifier>
                                 <ows:Title>OpenSearch Description to the Results</ows:Title>
@@ -132,6 +133,11 @@
                                     </Supported>
                                 </ComplexOutput>
                             </Output>
+
+
+
+
+
                         </ProcessOutputs>
                     </ProcessDescription>
                 </owc:result>

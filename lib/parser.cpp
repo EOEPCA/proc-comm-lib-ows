@@ -1,12 +1,14 @@
 
 #include "includes/parser.hpp"
 
+#include <functional>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <optional>
 
 #include "includes/macro.hpp"
-#define echo std::cout
+#define echo std::cout <<
 
 namespace EOEPCA {
 
@@ -15,6 +17,10 @@ const std::string& Parser::getName() const { return name; }
 /// Users/rdirienzo/Project/t2pc/src/t2serverwps/kungfu-wps/schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd?#117
 
 enum class OBJECT_NODE { INPUT, OUTPUT };
+
+using MAP_PARSER =
+    std::map<std::string,
+             const std::function<std::unique_ptr<OWS::Param>(xmlNode*)> >;
 
 std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
   auto format = std::make_unique<OWS::Format>();
@@ -32,8 +38,10 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
   return format;
 }
 
-[[nodiscard]] std::unique_ptr<OWS::ComplexData> parseComplexData(
+[[nodiscard]] std::unique_ptr<OWS::Param> parseComplexData(
     xmlNode* nodeComplexData) {
+  echo "PARSECOMPLEXDATA DATA\n";
+
   auto complexData = std::make_unique<OWS::ComplexData>();
 
   xmlChar* maximumMegabytes =
@@ -61,8 +69,10 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
   return std::move(complexData);
 }
 
-[[nodiscard]] std::unique_ptr<OWS::BoundingBoxData> parseBoundingBoxData(
+[[nodiscard]] std::unique_ptr<OWS::Param> parseBoundingBoxData(
     xmlNode* nodeBoundingBoxData) {
+  echo "PARSEBOUNDINGBOXDATA DATA\n";
+
   auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
 
   FOR(box, nodeBoundingBoxData) {
@@ -85,9 +95,11 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
   return std::move(boundingBoxData);
 }
 
-[[nodiscard]] std::unique_ptr<OWS::LiteralData> parseLiteralData(
+[[nodiscard]] std::unique_ptr<OWS::Param> parseLiteralData(
     xmlNode* nodeLiteralData) {
   auto literData = std::make_unique<OWS::LiteralData>();
+
+  echo "LITERLA DATA\n";
 
   FOR(ldata, nodeLiteralData) {
     if (IS_CHECK(ldata, "AnyValue", XMLNS_WPS1)) {
@@ -110,9 +122,11 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
   return std::move(literData);
 }
 
-void parseObject(xmlNode* nodeObject, OBJECT_NODE objectNode,
+#define FNCMAP(N, T) #N, std::bind(&T, std::placeholders::_1)
+
+void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
+                 OBJECT_NODE objectNode,
                  std::unique_ptr<OWS::OWSParameter>& ptrParams) {
-  // ptr definitions
   std::unique_ptr<OWS::Param> param{nullptr};
 
   auto ptrOccurs = std::make_unique<OWS::Occurs>();
@@ -128,9 +142,6 @@ void parseObject(xmlNode* nodeObject, OBJECT_NODE objectNode,
   }
 
   FOR(input, nodeObject) {
-
-    echo << "inputinputinputinput(name) " << input->name  << " " << input->ns->href<<"\n";
-
     if (IS_CHECK(input, "Identifier", XMLNS_OWS)) {
       ptrDescriptor->setIdentifier(
           std::string(CHAR_BAD_CAST xmlNodeGetContent(input)));
@@ -142,16 +153,9 @@ void parseObject(xmlNode* nodeObject, OBJECT_NODE objectNode,
           std::string(CHAR_BAD_CAST xmlNodeGetContent(input)));
     }
 
-    if (IS_INPUT(input, XMLNS_WPS1, "LiteralData")) {
-      param = parseLiteralData(input);
-    } else if (IS_INPUT(input, XMLNS_WPS1, "BoundingBoxData")) {
-      param = parseBoundingBoxData(input);
-    } else if (IS_INPUT(input, XMLNS_WPS1, "ComplexData")) {
-      param = parseComplexData(input);
+    if (auto f = mapParser[std::string(CHAR_BAD_CAST input->name)]) {
+      param = f(input);
     }
-
-
-
   }
 
   if (param) {
@@ -173,6 +177,12 @@ void parseOutput(xmlNode* nodeOutput) {}
 
 void parseProcessDescription(xmlNode* processDescription,
                              std::unique_ptr<OWS::OWSParameter>& ptrParams) {
+  MAP_PARSER mapParser{};
+  mapParser.emplace(FNCMAP(LiteralData, parseLiteralData));
+  mapParser.emplace(FNCMAP(BoundingBoxData, parseBoundingBoxData));
+  mapParser.emplace(FNCMAP(ComplexData, parseComplexData));
+  mapParser.emplace(FNCMAP(ComplexOutput, parseComplexData));
+
   xmlChar* processVersion =
       xmlGetProp(processDescription, (const xmlChar*)"processVersion");
   if (processVersion) {
@@ -192,14 +202,15 @@ void parseProcessDescription(xmlNode* processDescription,
     } else if (IS_CHECK(inner_cur_node, "DataInputs", XMLNS_ATOM)) {
       FOR(input, inner_cur_node) {
         // parser inputs
-        parseObject(input, OBJECT_NODE::INPUT, ptrParams);
+        parseObject(mapParser, input, OBJECT_NODE::INPUT, ptrParams);
       }
     } else if (IS_CHECK(inner_cur_node, "ProcessOutputs", XMLNS_ATOM)) {
       // parser outputs
-      echo << "ProcessOutputs*****\n";
-
-
-
+      FOR(I, inner_cur_node) {
+        if (I->children && XML_COMPARE(I->name, "Output")) {
+          parseObject(mapParser, I, OBJECT_NODE::OUTPUT, ptrParams);
+        }
+      }
     }
   }
 }

@@ -43,6 +43,11 @@ int main(int argc, const char** argv) {
     for (auto& y : theParams->getContents()) {
       std::cout << "\t" << y.code << " " << y.href << "\n";
     }
+
+    std::cout << "theParams SIZE INPUT: " <<  theParams->getInputs().size()<< "\n";
+    std::cout << "theParams SIZE OUTPUT: " <<  theParams->getOutputs().size();
+
+
   }
 
   return 0;
