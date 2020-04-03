@@ -12,10 +12,13 @@
 #define XML_DOCKER_TYPE "application/vnd.docker.distribution.manifest.v1+json"
 #define XML_CWL_TYPE "application/cwl"
 
-#define IF_XML_COMPARE(X1,CHAR) if (!xmlStrcmp(X1, (const xmlChar *) CHAR))
+#define XML_COMPARE(X1,CHAR) (!xmlStrcmp(X1, (const xmlChar *) CHAR))
 #define OFFERING_CODE "http://www.opengis.net/tb13/eoc/wpsProcessOffering"
-
+#define IS_CHECK(NODE,V,NS) (!xmlStrcmp(NODE->name, (const xmlChar *) V) && !xmlStrcmp(NODE->ns->href, (const xmlChar *) NS))
 #define CHAR_BAD_CAST (char*)
+
+#define IS_INPUT(NODE,NS,CHAR) IS_CHECK(NODE, CHAR, NS) || XML_COMPARE(NODE->name, CHAR)
+
 
 #define IS_FEED(D) if (!xmlStrcmp(D->name, (const xmlChar *) "feed") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_ATOM))
 #define IS_OFFERING(D) if (!xmlStrcmp(D->name, (const xmlChar *) "offering") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_OWC))
@@ -25,7 +28,7 @@
 #define IS_PROCESSOFFERINGS(D) if (!xmlStrcmp(D->name, (const xmlChar *) "ProcessOfferings") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_WPS))
 #define IS_PROCESSOFFERING(D) if (!xmlStrcmp(D->name, (const xmlChar *) "ProcessOffering") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_WPS))
 #define IS_PROCESS(D) if (!xmlStrcmp(D->name, (const xmlChar *) "Process") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_WPS))
-#define IS_CHECK(NODE,V,NS) if (!xmlStrcmp(NODE->name, (const xmlChar *) V) && !xmlStrcmp(NODE->ns->href, (const xmlChar *) NS))
+
 #define IS_IDENTIFIER(D) if (!xmlStrcmp(D->name, (const xmlChar *) "Identifier") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_OWS))
 #define IS_ENTRY(D) if (!xmlStrcmp(D->name,(const xmlChar*)"entry") &&!xmlStrcmp(D->ns->href,(const xmlChar*)XMLNS_ATOM))
 #define IS_ENTRYIDENTIFIER(D) if (!xmlStrcmp(D->name, (const xmlChar *) "identifier") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_PURL))

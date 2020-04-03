@@ -84,7 +84,7 @@
                                     [lon_min,lat_min,lon_max,lat_max]
                                 </ows:Abstract>
                                 <ows:Identifier>SubsetBoundingBox</ows:Identifier>
-                                <wps:ComplexData maximumMegabytes="22323">
+                                <ComplexData maximumMegabytes="22323">
                                     <Default>
                                         <Format>
                                             <MimeType>application/opensearchdescription+xml</MimeType>
@@ -109,7 +109,7 @@
                                             <Schema>dsadasdas</Schema>
                                         </Format>
                                     </Supported>
-                                </wps:ComplexData>
+                                </ComplexData>
                             </wps:Input>
 
 

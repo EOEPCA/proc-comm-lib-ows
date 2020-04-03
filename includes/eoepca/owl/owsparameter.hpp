@@ -280,8 +280,7 @@ class Format {
   Format(const LiteralData &) = delete;
   Format(Format &&) = delete;
 
-  ~Format() {
-  }
+  ~Format() {}
 
   void setMimeType(std::string pMimeType) {
     Format::mimeType = std::move(pMimeType);
@@ -383,6 +382,12 @@ class OWSParameter final : public Descriptor {
   void addInput(Param *param) {
     if (param) {
       inputs.emplace_back(param);
+    }
+  }
+
+  void addOutput(Param *param) {
+    if (param) {
+      outputs.emplace_back(param);
     }
   }
 
