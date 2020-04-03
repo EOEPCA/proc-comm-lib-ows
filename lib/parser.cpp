@@ -14,6 +14,54 @@ const std::string& Parser::getName() const { return name; }
 
 /// Users/rdirienzo/Project/t2pc/src/t2serverwps/kungfu-wps/schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd?#117
 
+std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
+  auto format = std::make_unique<OWS::Format>();
+
+  FOR(f, nodeComplexDataFormat) {
+    IF_XML_COMPARE(f->name, "MimeType") {
+      format->setMimeType(std::string(CHAR_BAD_CAST xmlNodeGetContent(f)));
+    }
+    else IF_XML_COMPARE(f->name, "Encoding") {
+      format->setEncoding(std::string(CHAR_BAD_CAST xmlNodeGetContent(f)));
+    }
+    else IF_XML_COMPARE(f->name, "Schema") {
+      format->setSchema(std::string(CHAR_BAD_CAST xmlNodeGetContent(f)));
+    }
+  }
+
+  return format;
+}
+
+[[nodiscard]] std::unique_ptr<OWS::ComplexData> parseComplexData(
+    xmlNode* nodeComplexData) {
+  auto complexData = std::make_unique<OWS::ComplexData>();
+
+  xmlChar* maximumMegabytes =
+      xmlGetProp(nodeComplexData, (const xmlChar*)"maximumMegabytes");
+
+  if (maximumMegabytes) {
+    complexData->setMaximumMegabytes(
+        std::string(CHAR_BAD_CAST maximumMegabytes));
+  }
+
+  FOR(box, nodeComplexData) {
+    IF_XML_COMPARE(box->name, "Default") {
+      FOR(format, box) {
+        auto mFrmat = getFormat(format);
+        complexData->moveDefaultSupported(mFrmat);
+      }
+    }
+    else IF_XML_COMPARE(box->name, "Supported") {
+      FOR(format, box) {
+        auto mFrmat = getFormat(format);
+        complexData->moveAddSupported(mFrmat);
+      }
+    }
+  }
+
+  return std::move(complexData);
+}
+
 [[nodiscard]] std::unique_ptr<OWS::BoundingBoxData> parseBoundingBoxData(
     xmlNode* nodeBoundingBoxData) {
   auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
@@ -44,7 +92,6 @@ const std::string& Parser::getName() const { return name; }
   auto literData = std::make_unique<OWS::LiteralData>();
 
   FOR(ldata, nodeLiteralData) {
-    echo << "\t\t" << ldata->name << "\n";
     IS_CHECK(ldata, "AnyValue", XMLNS_WPS1) {}
     else IS_CHECK(ldata, "AllowedValues", XMLNS_OWS) {
       FOR(value, ldata) {
@@ -106,11 +153,16 @@ void parseInput(xmlNode* nodeInput,
     IF_XML_COMPARE(input->ns->href, XMLNS_WPS1) {
       IS_CHECK(input, "LiteralData", XMLNS_WPS1) {
         // get literal data
-        param.reset(parseLiteralData(input).release());
+        param = parseLiteralData(input);
       }
       else IS_CHECK(input, "BoundingBoxData", XMLNS_WPS1) {
         // get literal data
-        param.reset(parseBoundingBoxData(input).release());
+        param = parseBoundingBoxData(input);
+      }
+      else IS_CHECK(input, "ComplexData", XMLNS_WPS1) {
+        param = parseComplexData(input);
+      } else IF_XML_COMPARE(input->name,"ComplexData"){
+            param = parseComplexData(input);
       }
       else {
         std::string err("Type ");
@@ -156,7 +208,6 @@ void parseProcessDescription(xmlNode* processDescription,
           std::string(CHAR_BAD_CAST xmlNodeGetContent(inner_cur_node)));
     }
     else IS_CHECK(inner_cur_node, "DataInputs", XMLNS_ATOM) {
-      echo << "DATAINPUT*****\n";
       FOR(input, inner_cur_node) { parseInput(input, ptrParams); }
     }
     else IS_CHECK(inner_cur_node, "ProcessOutputs", XMLNS_ATOM) {

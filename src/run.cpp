@@ -4,9 +4,12 @@
 #include <eoepca/owl/owsparameter.hpp>
 #include <functional>
 #include <iostream>
+#include <list>
 #include <memory>
+#include <string>
 
 int main(int argc, const char** argv) {
+
   if (argc == 1) {
     std::cerr << "arg1: ows file path";
     return 1;
@@ -26,7 +29,7 @@ int main(int argc, const char** argv) {
   std::cout << "Run: \n";
 
   std::unique_ptr<EOEPCA::OWS::OWSParameter,
-                  std::function<void(EOEPCA::OWS::OWSParameter*)> >
+                  std::function<void(EOEPCA::OWS::OWSParameter*)>>
       theParams(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
   if (theParams) {
@@ -36,7 +39,6 @@ int main(int argc, const char** argv) {
     std::cout << theParams->getIdentifier() << "\n";
     std::cout << theParams->getTitle() << "\n";
     std::cout << theParams->getAbstract() << "\n";
-
 
     for (auto& y : theParams->getContents()) {
       std::cout << "\t" << y.code << " " << y.href << "\n";

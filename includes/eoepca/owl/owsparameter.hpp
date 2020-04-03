@@ -249,7 +249,7 @@ class LiteralData final : public Param, public Values {
   LiteralData(const LiteralData &) = delete;
   LiteralData(LiteralData &&) = delete;
 
-  ~LiteralData() = default;
+  ~LiteralData() override = default;
 
  public:
   std::string getType() override { return std::string("LiteralData"); }
@@ -260,19 +260,91 @@ class BoundingBoxData final : public Param, public Supported {
  public:
   BoundingBoxData() = default;
 
-  BoundingBoxData(const LiteralData &) = delete;
+  BoundingBoxData(const BoundingBoxData &) = delete;
   BoundingBoxData(BoundingBoxData &&) = delete;
 
-  ~BoundingBoxData() = default;
+  ~BoundingBoxData() override = default;
 
  public:
   std::string getType() override { return std::string("BoundingBoxData"); }
 };
 
-class ComplexData final : public Param {
- private:
+class Format {
+  std::string mimeType{""};
+  std::string encoding{""};
+  std::string schema{""};
+
  public:
+  Format() = default;
+
+  Format(const LiteralData &) = delete;
+  Format(Format &&) = delete;
+
+  ~Format() {
+  }
+
+  void setMimeType(std::string pMimeType) {
+    Format::mimeType = std::move(pMimeType);
+  }
+  void setEncoding(std::string pEncoding) {
+    Format::encoding = std::move(pEncoding);
+  }
+  void setSchema(std::string pSchema) { Format::schema = std::move(pSchema); }
+
+  const std::string &getMimeType() const { return mimeType; }
+  const std::string &getEncoding() const { return encoding; }
+  const std::string &getSchema() const { return schema; }
+};
+
+class ComplexData final : public Param {
+  std::list<std::unique_ptr<Format>> supported{};
+  std::unique_ptr<Format> defaultSupported{nullptr};
+
+  long maximumMegabytes = 0;
+
+ public:
+  ComplexData() = default;
+
+  ComplexData(const LiteralData &) = delete;
+  ComplexData(ComplexData &&) = delete;
+
+  ~ComplexData() override = default;
+
+ public:
+  void setMaximumMegabytes(long pValue) { maximumMegabytes = pValue; }
+  void setMaximumMegabytes(std::string pValue) {
+    if (pValue.empty()) {
+      maximumMegabytes = 0;
+    } else {
+      std::istringstream iss(pValue);
+      iss >> maximumMegabytes;
+      if (iss.fail()) {
+        // TODO: raise the exception
+      }
+    }
+  }
+
   std::string getType() override { return std::string("ComplexData"); }
+
+  void moveDefaultSupported(std::unique_ptr<Format> &format) {
+    if (format) {
+      defaultSupported.reset(format.release());
+    }
+  }
+
+  void moveAddSupported(std::unique_ptr<Format> &format) {
+    if (format) {
+      supported.emplace_back(format.release());
+    }
+  }
+
+  const std::list<std::unique_ptr<Format>> &getSupported() const {
+    return supported;
+  }
+
+  const std::unique_ptr<Format> &getDefaultSupported() const {
+    return defaultSupported;
+  }
 };
 
 struct Content {
