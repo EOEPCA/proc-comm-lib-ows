@@ -355,22 +355,18 @@ struct Content {
       : code(std::move(pCode)), href(std::move(pHref)) {}
 };
 
-class OWSOffering final : public Descriptor {
+class OWSProcessDescription final : public Descriptor {
   std::list<std::unique_ptr<Param>> inputs;
   std::list<std::unique_ptr<Param>> outputs;
 
-  std::list<Content> contents{};
+ public:
+  OWSProcessDescription() = default;
+  OWSProcessDescription(const OWSProcessDescription &) = delete;
+  OWSProcessDescription(OWSProcessDescription &&) = delete;
+
+  ~OWSProcessDescription() override = default;
 
  public:
-  OWSOffering() = default;
-  OWSOffering(const OWSOffering &) = delete;
-  OWSOffering(OWSOffering &&) = delete;
-
-  ~OWSOffering() override = default;
-
- public:
-  const std::list<Content> &getContents() const { return contents; }
-
   void addInput(Param *param) {
     if (param) {
       inputs.emplace_back(param);
@@ -383,15 +379,43 @@ class OWSOffering final : public Descriptor {
     }
   }
 
+  const std::list<std::unique_ptr<Param>> &getInputs() const { return inputs; }
+  const std::list<std::unique_ptr<Param>> &getOutputs() const {
+    return outputs;
+  }
+};
+
+class OWSOffering {
+  std::list<std::unique_ptr<OWSProcessDescription>> processDescription{};
+
+  std::list<Content> contents{};
+
+ public:
+  OWSOffering() = default;
+  OWSOffering(const OWSOffering &) = delete;
+  OWSOffering(OWSOffering &&) = delete;
+
+  ~OWSOffering() = default;
+
+ public:
+  const std::list<Content> &getContents() const { return contents; }
+
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {
       contents.emplace_back(std::move(code), std::move(href));
     }
   }
 
-  const std::list<std::unique_ptr<Param>> &getInputs() const { return inputs; }
-  const std::list<std::unique_ptr<Param>> &getOutputs() const {
-    return outputs;
+  void moveAddProcessDescription(
+      std::unique_ptr<OWSProcessDescription> &offering) {
+    if (offering) {
+      processDescription.emplace_back(std::move(offering));
+    }
+  }
+
+  const std::list<std::unique_ptr<OWSProcessDescription>>
+      &getProcessDescription() const {
+    return processDescription;
   }
 };
 
@@ -423,6 +447,32 @@ class OWSEntry {
     return offerings;
   }
 };
+
+
+class OWSContext{
+
+  std::list<std::unique_ptr<OWSEntry> > entries;
+ public:
+
+  OWSContext() = default;
+  OWSContext(const OWSContext &) = delete;
+  OWSContext(OWSContext &&) = delete;
+
+  ~OWSContext() = default;
+
+ public:
+  const std::list<std::unique_ptr<OWSEntry>> &getEntries() const {
+    return entries;
+  }
+
+  void moveAddEntry(std::unique_ptr<OWSEntry> &entry) {
+    if (entry) {
+      entries.emplace_back(std::move(entry));
+    }
+  }
+
+};
+
 
 }  // namespace EOEPCA::OWS
 #endif  // EOEPCAOWS_OWSPARAMETER_HPP

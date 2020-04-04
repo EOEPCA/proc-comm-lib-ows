@@ -126,7 +126,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
                  OBJECT_NODE objectNode,
-                 std::unique_ptr<OWS::OWSOffering>& ptrParams) {
+                 std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   std::unique_ptr<OWS::Param> param{nullptr};
 
   auto ptrOccurs = std::make_unique<OWS::Occurs>();
@@ -175,11 +175,14 @@ void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
 
 void parseOutput(xmlNode* nodeOutput) {}
 
-void parseProcessDescription(xmlNode* processDescription,
-                             std::unique_ptr<OWS::OWSOffering>& ptrParams) {
+void parseProcessDescription(
+    xmlNode* processDescription,
+    std::unique_ptr<OWS::OWSProcessDescription>& ptrParams) {
   MAP_PARSER mapParser{};
   mapParser.emplace(FNCMAP(LiteralData, parseLiteralData));
+  mapParser.emplace(FNCMAP(LiteralOutput, parseLiteralData));
   mapParser.emplace(FNCMAP(BoundingBoxData, parseBoundingBoxData));
+  mapParser.emplace(FNCMAP(BoundingBoxOutput, parseBoundingBoxData));
   mapParser.emplace(FNCMAP(ComplexData, parseComplexData));
   mapParser.emplace(FNCMAP(ComplexOutput, parseComplexData));
 
@@ -216,14 +219,15 @@ void parseProcessDescription(xmlNode* processDescription,
 }
 
 void parseOffering(xmlNode* offering_node,
-                   std::unique_ptr<OWS::OWSOffering>& ptrParams) {
+                   std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   FOR(inner_cur_node, offering_node) {
     if (IS_CHECK(inner_cur_node, "content", XMLNS_OWC)) {
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
       xmlChar* href = xmlGetProp(inner_cur_node, (const xmlChar*)"href");
 
-      ptrParams->addContent(std::string(CHAR_BAD_CAST code),
-                            std::string(CHAR_BAD_CAST href));
+      ptrOffering->addContent(std::string(CHAR_BAD_CAST code),
+                              std::string(CHAR_BAD_CAST href));
+
     } else if (IS_CHECK(inner_cur_node, "operation", XMLNS_OWC)) {
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"code");
       if (code) {
@@ -231,7 +235,9 @@ void parseOffering(xmlNode* offering_node,
           if (inner_cur_node->children) {
             FOR(desc, inner_cur_node->children) {
               if (IS_CHECK(desc, "ProcessDescription", XMLNS_ATOM)) {
+                auto ptrParams = std::make_unique<OWS::OWSProcessDescription>();
                 parseProcessDescription(desc, ptrParams);
+                ptrOffering->moveAddProcessDescription(ptrParams);
               }
             }
           }
@@ -252,9 +258,9 @@ void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
             std::string((char*)xmlNodeGetContent(inner_cur_node)));
 
       } else if (IS_CHECK(inner_cur_node, "offering", XMLNS_OWC)) {
-        auto ptrParams = std::make_unique<OWS::OWSOffering>();
-        parseOffering(inner_cur_node, ptrParams);
-        owsEntry->moveAddOffering(ptrParams);
+        auto ptrOffering = std::make_unique<OWS::OWSOffering>();
+        parseOffering(inner_cur_node, ptrOffering);
+        owsEntry->moveAddOffering(ptrOffering);
       }
     }
   }

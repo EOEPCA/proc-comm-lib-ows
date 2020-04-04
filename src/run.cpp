@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 
 int main(int argc, const char** argv) {
@@ -36,16 +37,19 @@ int main(int argc, const char** argv) {
     std::cout << theParams->getPackageIdentifier() << "\n";
 
     for (auto& off : theParams->getOfferings()) {
-      std::cout << off->getIdentifier() << "\n";
-      std::cout << off->getTitle() << "\n";
-      std::cout << off->getAbstract() << "\n";
-
       for (auto& y : off->getContents()) {
         std::cout << "\t" << y.code << " " << y.href << "\n";
       }
 
-      std::cout << "theParams SIZE INPUT: " << off->getInputs().size() << "\n";
-      std::cout << "theParams SIZE OUTPUT: " << off->getOutputs().size();
+      for (auto& proc : off->getProcessDescription()) {
+        std::cout << proc->getIdentifier() << "\n";
+        std::cout << proc->getTitle() << "\n";
+        std::cout << proc->getAbstract() << "\n";
+
+        std::cout << "theParams SIZE INPUT: " << proc->getInputs().size()
+                  << "\n";
+        std::cout << "theParams SIZE OUTPUT: " << proc->getOutputs().size();
+      }
     }
   }
 

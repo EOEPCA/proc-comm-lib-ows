@@ -37,11 +37,14 @@ extern "C" EOEPCA::OWS::OWSEntry* parseFromFile(const char* fileName) {
   }
 }
 
+[[nodiscard]]
 extern "C" EOEPCA::OWS::OWSEntry* parseFromMemory(const char* xmlBuffer,
                                                       int size) {
   auto parser = std::make_unique<EOEPCA::Parser>();
   return parser->parseXml(xmlBuffer, size);
 }
+
+
 
 extern "C" void releaseParameter(EOEPCA::OWS::OWSEntry* parameter) {
   delete parameter;
