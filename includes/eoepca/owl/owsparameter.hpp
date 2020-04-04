@@ -367,15 +367,15 @@ class OWSProcessDescription final : public Descriptor {
   ~OWSProcessDescription() override = default;
 
  public:
-  void addInput(Param *param) {
+  void addMoveInput(std::unique_ptr<Param>& param) {
     if (param) {
-      inputs.emplace_back(param);
+      inputs.emplace_back(std::move(param));
     }
   }
 
-  void addOutput(Param *param) {
+  void addMoveOutput(std::unique_ptr<Param>& param) {
     if (param) {
-      outputs.emplace_back(param);
+      outputs.emplace_back(std::move(param));
     }
   }
 

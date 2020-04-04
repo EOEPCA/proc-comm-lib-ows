@@ -162,11 +162,11 @@ void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
     *param << *ptrDescriptor << *ptrOccurs;
     switch (objectNode) {
       case OBJECT_NODE::INPUT: {
-        ptrParams->addInput(param.release());
+        ptrParams->addMoveInput(param);
         break;
       }
       case OBJECT_NODE::OUTPUT: {
-        ptrParams->addOutput(param.release());
+        ptrParams->addMoveOutput(param);
         break;
       }
     }
@@ -266,7 +266,7 @@ void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
   }
 }
 
-OWS::OWSEntry* Parser::parseXml(const char* bufferXml, int size) {
+OWS::OWSContext* Parser::parseXml(const char* bufferXml, int size) {
   int ret = 0;
   xmlDoc* doc = nullptr;
   xmlNode* root_element = nullptr;
@@ -277,7 +277,8 @@ OWS::OWSEntry* Parser::parseXml(const char* bufferXml, int size) {
   std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> pDoc{
       xmlReadMemory(bufferXml, size, nullptr, nullptr, option), &xmlFreeDoc};
 
-  auto owsEntry = std::make_unique<OWS::OWSEntry>();
+  auto owsContext = std::make_unique<OWS::OWSContext>();
+
 
   try {
     if (pDoc == nullptr) {
@@ -297,7 +298,10 @@ OWS::OWSEntry* Parser::parseXml(const char* bufferXml, int size) {
                 continue;
               } else if (inner_entry_node->type == XML_ELEMENT_NODE) {
                 if (IS_CHECK(inner_entry_node, "entry", XMLNS_ATOM)) {
+
+                  auto owsEntry = std::make_unique<OWS::OWSEntry>();
                   parseEntry(inner_entry_node, owsEntry);
+                  owsContext->moveAddEntry(owsEntry);
                 }
               }
             }
@@ -308,15 +312,15 @@ OWS::OWSEntry* Parser::parseXml(const char* bufferXml, int size) {
 
   } catch (std::runtime_error& err) {
     std::cerr << err.what() << "\n";
-    owsEntry.reset(nullptr);
+    owsContext.reset(nullptr);
   } catch (...) {
     std::cerr << "CATCH!!!\n";
-    owsEntry.reset(nullptr);
+    owsContext.reset(nullptr);
   }
 
   xmlCleanupParser();
 
-  return owsEntry.release();
+  return owsContext.release();
 }
 
 Parser::~Parser() {}

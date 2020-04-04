@@ -28,29 +28,39 @@ int main(int argc, const char** argv) {
   std::cout << "LIB name: " << theName.get() << "\n";
   std::cout << "Run: \n";
 
-  std::unique_ptr<EOEPCA::OWS::OWSEntry,
-                  std::function<void(EOEPCA::OWS::OWSEntry*)>>
-      theParams(lib->parseFromFile(argv[1]), lib->releaseParameter);
+  std::unique_ptr<EOEPCA::OWS::OWSContext,
+                  std::function<void(EOEPCA::OWS::OWSContext*)>>
+      ptrContext(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
-  if (theParams) {
-    std::cout << "********************************\n";
-    std::cout << theParams->getPackageIdentifier() << "\n";
+  if (ptrContext) {
 
-    for (auto& off : theParams->getOfferings()) {
-      for (auto& y : off->getContents()) {
-        std::cout << "\t" << y.code << " " << y.href << "\n";
+
+    for(auto&theParams: ptrContext->getEntries()){
+
+      std::cout << "********************************\n";
+      std::cout << theParams->getPackageIdentifier() << "\n";
+
+      for (auto& off : theParams->getOfferings()) {
+        for (auto& y : off->getContents()) {
+          std::cout << "\t" << y.code << " " << y.href << "\n";
+        }
+
+        for (auto& proc : off->getProcessDescription()) {
+          std::cout << proc->getIdentifier() << "\n";
+          std::cout << proc->getTitle() << "\n";
+          std::cout << proc->getAbstract() << "\n";
+
+          std::cout << "theParams SIZE INPUT: " << proc->getInputs().size()
+                    << "\n";
+          std::cout << "theParams SIZE OUTPUT: " << proc->getOutputs().size();
+        }
       }
 
-      for (auto& proc : off->getProcessDescription()) {
-        std::cout << proc->getIdentifier() << "\n";
-        std::cout << proc->getTitle() << "\n";
-        std::cout << proc->getAbstract() << "\n";
-
-        std::cout << "theParams SIZE INPUT: " << proc->getInputs().size()
-                  << "\n";
-        std::cout << "theParams SIZE OUTPUT: " << proc->getOutputs().size();
-      }
     }
+
+
+
+
   }
 
   return 0;
