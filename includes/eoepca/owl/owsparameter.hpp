@@ -375,13 +375,13 @@ class OWSProcessDescription final : public Descriptor {
   ~OWSProcessDescription() override = default;
 
  public:
-  void addMoveInput(std::unique_ptr<Param>& param) {
+  void addMoveInput(std::unique_ptr<Param> &param) {
     if (param) {
       inputs.emplace_back(std::move(param));
     }
   }
 
-  void addMoveOutput(std::unique_ptr<Param>& param) {
+  void addMoveOutput(std::unique_ptr<Param> &param) {
     if (param) {
       outputs.emplace_back(std::move(param));
     }
@@ -406,7 +406,7 @@ class OWSOffering {
   ~OWSOffering() = default;
 
  public:
-    const std::list<Content> &getContents() const { return contents; }
+  const std::list<Content> &getContents() const { return contents; }
 
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {
@@ -456,12 +456,10 @@ class OWSEntry {
   }
 };
 
+class OWSContext {
+  std::list<std::unique_ptr<OWSEntry>> entries;
 
-class OWSContext{
-
-  std::list<std::unique_ptr<OWSEntry> > entries;
  public:
-
   OWSContext() = default;
   OWSContext(const OWSContext &) = delete;
   OWSContext(OWSContext &&) = delete;
@@ -478,9 +476,7 @@ class OWSContext{
       entries.emplace_back(std::move(entry));
     }
   }
-
 };
-
 
 }  // namespace EOEPCA::OWS
 #endif  // EOEPCAOWS_OWSPARAMETER_HPP

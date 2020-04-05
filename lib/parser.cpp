@@ -40,7 +40,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 [[nodiscard]] std::unique_ptr<OWS::Param> parseComplexData(
     xmlNode* nodeComplexData) {
-  //echo "PARSECOMPLEXDATA DATA\n";
+  // echo "PARSECOMPLEXDATA DATA\n";
 
   auto complexData = std::make_unique<OWS::ComplexData>();
 
@@ -71,7 +71,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 [[nodiscard]] std::unique_ptr<OWS::Param> parseBoundingBoxData(
     xmlNode* nodeBoundingBoxData) {
-  //echo "PARSEBOUNDINGBOXDATA DATA\n";
+  // echo "PARSEBOUNDINGBOXDATA DATA\n";
 
   auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
 
@@ -99,7 +99,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
     xmlNode* nodeLiteralData) {
   auto literData = std::make_unique<OWS::LiteralData>();
 
-  //echo "LITERLA DATA\n";
+  // echo "LITERLA DATA\n";
 
   FOR(ldata, nodeLiteralData) {
     if (IS_CHECK(ldata, "AnyValue", XMLNS_WPS1)) {
@@ -154,7 +154,7 @@ void parseObject(MAP_PARSER& mapParser, xmlNode* nodeObject,
     }
 
     if (auto f = mapParser[std::string(CHAR_BAD_CAST input->name)]) {
-      param = f(input);
+      if (f) param = f(input);
     }
   }
 
@@ -279,7 +279,6 @@ OWS::OWSContext* Parser::parseXml(const char* bufferXml, int size) {
 
   auto owsContext = std::make_unique<OWS::OWSContext>();
 
-
   try {
     if (pDoc == nullptr) {
       ret = 2;
@@ -298,7 +297,6 @@ OWS::OWSContext* Parser::parseXml(const char* bufferXml, int size) {
                 continue;
               } else if (inner_entry_node->type == XML_ELEMENT_NODE) {
                 if (IS_CHECK(inner_entry_node, "entry", XMLNS_ATOM)) {
-
                   auto owsEntry = std::make_unique<OWS::OWSEntry>();
                   parseEntry(inner_entry_node, owsEntry);
                   owsContext->moveAddEntry(owsEntry);
