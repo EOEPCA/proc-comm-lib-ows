@@ -205,6 +205,9 @@ class Supported {
   }
 
   void setDefault(std::string value) { defaultValue = std::move(value); }
+
+  const std::list<std::string> &getSupported() const { return supported; }
+  const std::string &getDefaultValue() const { return defaultValue; }
 };
 
 class Values {
@@ -236,6 +239,11 @@ class Values {
   }
 
   void setDefault(std::string value) { defaultValue = std::move(value); }
+
+  const std::list<std::string> &getAllowedValues() const {
+    return allowedValues;
+  }
+  const std::string &getDefaultValue() const { return defaultValue; }
 };
 
 class LiteralData final : public Param, public Values {
@@ -398,7 +406,7 @@ class OWSOffering {
   ~OWSOffering() = default;
 
  public:
-  const std::list<Content> &getContents() const { return contents; }
+    const std::list<Content> &getContents() const { return contents; }
 
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {

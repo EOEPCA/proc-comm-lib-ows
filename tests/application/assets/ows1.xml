@@ -29,8 +29,7 @@
                             <wps:Input minOccurs="1">
                                 <ows:Identifier>input_reference</ows:Identifier>
                                 <ows:Title>S2 references</ows:Title>
-                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references
-                                </ows:Abstract>
+                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references</ows:Abstract>
                                 <wps:LiteralData>
                                     <ows:DataType>string</ows:DataType>
                                     <ows:AnyValue/>
@@ -40,10 +39,9 @@
 
 
                             <wps:Input minOccurs="1">
-                                <ows:Identifier>input_references</ows:Identifier>
+                                <ows:Identifier>input_references_liv</ows:Identifier>
                                 <ows:Title>S2 references</ows:Title>
-                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references
-                                </ows:Abstract>
+                                <ows:Abstract>S2 input reference as a comma separated list of catalogue references</ows:Abstract>
                                 <wps:LiteralData>
                                     <ows:AnyValue/>
                                     <ows:AllowedValues>
@@ -95,18 +93,18 @@
                                     <Supported>
                                         <Format>
                                             <MimeType>application/opensearchdescription+xml</MimeType>
-                                            <Encoding>sadasda</Encoding>
-                                            <Schema>dsadasdas</Schema>
+                                            <Encoding>Encoding 1</Encoding>
+                                            <Schema>Encoding 2</Schema>
                                         </Format>
                                         <Format>
                                             <MimeType>application/opensearchdescription+xml2</MimeType>
-                                            <Encoding>sadasda</Encoding>
-                                            <Schema>dsadasdas</Schema>
+                                            <Encoding>Encoding 3</Encoding>
+                                            <Schema>Encoding 4</Schema>
                                         </Format>
                                         <Format>
                                             <MimeType>application/opensearchdescription+xml3</MimeType>
-                                            <Encoding>sadasda</Encoding>
-                                            <Schema>dsadasdas</Schema>
+                                            <Encoding>Encoding 5</Encoding>
+                                            <Schema>Encoding 6</Schema>
                                         </Format>
                                     </Supported>
                                 </ComplexData>

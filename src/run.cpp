@@ -15,8 +15,10 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  //build *inix
   auto lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.so");
   if (!lib->IsValid()) {
+    //build mac
     lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.dylib");
   }
 
@@ -33,10 +35,7 @@ int main(int argc, const char** argv) {
       ptrContext(lib->parseFromFile(argv[1]), lib->releaseParameter);
 
   if (ptrContext) {
-
-
-    for(auto&theParams: ptrContext->getEntries()){
-
+    for (auto& theParams : ptrContext->getEntries()) {
       std::cout << "********************************\n";
       std::cout << theParams->getPackageIdentifier() << "\n";
 
@@ -55,12 +54,7 @@ int main(int argc, const char** argv) {
           std::cout << "theParams SIZE OUTPUT: " << proc->getOutputs().size();
         }
       }
-
     }
-
-
-
-
   }
 
   return 0;

@@ -13,7 +13,7 @@
 
 namespace EOEPCA {
 class Parser {
-  std::string name{"EOEPCA OWS Parser "};
+  std::string name{"EOEPCA OWS Parser"};
 
  public:
   Parser() = default;

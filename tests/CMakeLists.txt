@@ -37,7 +37,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 
-file(GLOB test_sources [a-z_]*.cpp application/[a-z_]*.cpp )
+file(GLOB test_sources [a-z_]*.cpp application/[a-z_]*.hpp application/[a-z_]*.cpp)
 
 
 SET(LIB_TEST_NAME

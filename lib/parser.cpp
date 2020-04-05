@@ -8,7 +8,7 @@
 #include <optional>
 
 #include "includes/macro.hpp"
-#define echo std::cout <<
+//#define echo std::cout <<
 
 namespace EOEPCA {
 
@@ -40,7 +40,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 [[nodiscard]] std::unique_ptr<OWS::Param> parseComplexData(
     xmlNode* nodeComplexData) {
-  echo "PARSECOMPLEXDATA DATA\n";
+  //echo "PARSECOMPLEXDATA DATA\n";
 
   auto complexData = std::make_unique<OWS::ComplexData>();
 
@@ -71,7 +71,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
 
 [[nodiscard]] std::unique_ptr<OWS::Param> parseBoundingBoxData(
     xmlNode* nodeBoundingBoxData) {
-  echo "PARSEBOUNDINGBOXDATA DATA\n";
+  //echo "PARSEBOUNDINGBOXDATA DATA\n";
 
   auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
 
@@ -99,7 +99,7 @@ std::unique_ptr<OWS::Format> getFormat(xmlNode* nodeComplexDataFormat) {
     xmlNode* nodeLiteralData) {
   auto literData = std::make_unique<OWS::LiteralData>();
 
-  echo "LITERLA DATA\n";
+  //echo "LITERLA DATA\n";
 
   FOR(ldata, nodeLiteralData) {
     if (IS_CHECK(ldata, "AnyValue", XMLNS_WPS1)) {
