@@ -39,6 +39,9 @@ endif()
 
 file(GLOB test_sources [a-z_]*.cpp application/[a-z_]*.hpp application/[a-z_]*.cpp)
 
+SET(MODS_LIBS
+        z m dl
+        )
 
 SET(LIB_TEST_NAME
     libtest-test

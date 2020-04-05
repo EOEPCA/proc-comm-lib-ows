@@ -26,3 +26,9 @@ expected output:
 LIB version: 1
 LIB name: EOEPCA OWS Parser
 ```
+
+Run tests
+
+```shell script
+./build/tests/libtest-test --gtest_break_on_failure
+```
