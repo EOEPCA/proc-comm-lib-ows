@@ -48,6 +48,6 @@ SET(LIB_TEST_NAME
 )
 
 add_executable(${LIB_TEST_NAME} ${test_sources})
-target_link_libraries(${LIB_TEST_NAME} gtest_main)
+target_link_libraries(${LIB_TEST_NAME} ${MODS_LIBS} gtest_main)
 add_test(NAME eoepca_test_run COMMAND ${LIB_TEST_NAME})
 
