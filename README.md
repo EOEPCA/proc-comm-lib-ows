@@ -17,7 +17,7 @@ docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} 
 
 cd build
 
-./runner
+./runner ../tests/application/assets/ows1.xml
 ```
 
 expected output:
