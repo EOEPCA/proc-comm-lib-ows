@@ -25,6 +25,6 @@ else
 
     source travis/libs/build.sh
 
-    docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} ./tests/libtest-test
+    docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} ./tests/libtest-test --gtest_break_on_failure
 
 fi
