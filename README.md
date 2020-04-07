@@ -77,7 +77,7 @@ The `Identifier` tag uniquely defines the element package ID
 
 The content tag, the child of offering, defines
 
-1. The CLW descriptor that represents the application(application/cwl)
+1. The CWL descriptor that represents the application(application/cwl)
 1. The Docker Image that contains the application(application/vnd.docker.distribution.manifest.v1+json)
 
 ```xml
