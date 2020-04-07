@@ -304,9 +304,8 @@ Parse:
 The entities used after the parser are described in `proc-comm-lib-ows/includes/eoepca/owl/owsparameter.hpp`. the main object is OWSEntry
 
 ```c++
-class OWSEntry {
-  std::list<std::unique_ptr<OWSOffering>> offerings{};
-  std::string packageIdentifier{""};
+class OWSContext {
+  std::list<std::unique_ptr<OWSEntry>> entries;
 
  public:
 
