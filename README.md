@@ -301,7 +301,7 @@ The library is imported using its path
 
 Parse:
 
-The entities used after the parser are described in `proc-comm-lib-ows/includes/eoepca/owl/owsparameter.hpp`. the main object is OWSEntry
+The entities used after the parser are described in `proc-comm-lib-ows/includes/eoepca/owl/owsparameter.hpp`. the main object is OWSContext
 
 ```c++
 class OWSContext {
