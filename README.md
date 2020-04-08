@@ -62,14 +62,14 @@ The `feed` element defines the root of the search
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:owc="http://www.opengis.net/owc/1.0" xmlns="http://www.w3.org/2005/Atom"
-      xmlns:terradue="http://www.terradue.com">
+      xmlns:example="http://www.example.com">
     <entry>
 ```
 
 The `Identifier` tag uniquely defines the element package ID
 ```xml
 <feed xmlns:owc="http://www.opengis.net/owc/1.0" xmlns="http://www.w3.org/2005/Atom"
-      xmlns:terradue="http://www.terradue.com">
+      xmlns:example="http://www.example.com">
     <entry>
         <identifier xmlns="http://purl.org/dc/elements/1.1/">application_package_dlr_s2_preproc</identifier>
         <title type="text">Application package for DLR Sentinel-2 pre-p
@@ -84,16 +84,16 @@ The content tag, the child of offering, defines
 <owc:offering xmlns:owc="http://www.opengis.net/owc/1.0"
               code="http://www.opengis.net/spec/owc-atom/1.0/req/wps">
     <owc:content type="application/vnd.docker.distribution.manifest.v1+json"
-                 href="docker-co.terradue.com/dlr-s2-preproc:0.0.1.2"/>
+                 href="docker-co.example.com/the-operation:0.0.1.2"/>
     <owc:content type="application/cwl"
-                 href="https://store.terradue.com/api/ec-better/_applications/ec-better/dlr-s2-preproc/0.0.1.2/dlr-s2-preproc.0.0.1.2-application.cwl"/>
+                 href="https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl"/>
 
 ```
 
 The parser examines the DescribeProcess operation
 
 ```xml
-          href="https://store.terradue.com/api/ec-better/_applications/ec-better/dlr-s2-preproc/0.0.1.2/dlr-s2-preproc.0.0.1.2-application.cwl"/>
+          href="https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl"/>
   <owc:operation code="DescribeProcess">
       <owc:result type="text/xml">
           <ProcessDescription xml
@@ -358,9 +358,9 @@ LIB name: EOEPCA OWS Parser
 Run:
 ********************************
 application_package_dlr_s2_preproc
-	application/vnd.docker.distribution.manifest.v1+json docker-co.terradue.com/dlr-s2-preproc:0.0.1.2
-	application/cwl https://store.terradue.com/api/ec-better/_applications/ec-better/dlr-s2-preproc/0.0.1.2/dlr-s2-preproc.0.0.1.2-application.cwl
-dlr-s2-preproc
+	application/vnd.docker.distribution.manifest.v1+json docker-co.example.com/the-operation:0.0.1.2
+	application/cwl https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl
+the-operation
 DLR Sentinel-2 pre-processing
 ABSTRACT DLR Sentinel-2 pre-processing
 theParams SIZE INPUT: 4
