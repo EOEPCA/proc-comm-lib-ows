@@ -231,8 +231,12 @@ drwxr-xr-x 6 root root  4096 Apr  7 12:37 CMakeFiles
 
 The library has been created `libeoepcaows.so`
 
-
 ### Testing
+
+#### Prerequisites
+
+- [LibXml2](http://xmlsoft.org/)
+- [LibXslt](http://xmlsoft.org/)
 
 from the root of the repository
 
@@ -361,8 +365,8 @@ application_package_dlr_s2_preproc
 	application/vnd.docker.distribution.manifest.v1+json docker-co.example.com/the-operation:0.0.1.2
 	application/cwl https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl
 the-operation
-DLR Sentinel-2 pre-processing
-ABSTRACT DLR Sentinel-2 pre-processing
+APC APC-2 pre-processing
+ABSTRACT APC APC-2 pre-processing
 theParams SIZE INPUT: 4
 theParams SIZE OUTPUT: 1
 ```
