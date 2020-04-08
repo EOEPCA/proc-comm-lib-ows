@@ -84,7 +84,7 @@ The content tag, the child of offering, defines
 <owc:offering xmlns:owc="http://www.opengis.net/owc/1.0"
               code="http://www.opengis.net/spec/owc-atom/1.0/req/wps">
     <owc:content type="application/vnd.docker.distribution.manifest.v1+json"
-                 href="docker-qbert.example.com/the-operation:0.0.1.2"/>
+                 href="docker-co.example.com/the-operation:0.0.1.2"/>
     <owc:content type="application/cwl"
                  href="https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl"/>
 
@@ -103,7 +103,7 @@ The document defines inputs `DataInputs` and outputs `ProcessOutputs`
 
 ```xml
 <ows:Title>DLR Sentinel-2 pre-processing</ows:Title>
-                    <ows:Abstract>ABSTRACT DLR Sentinel-2 pre-processing</ows:Abstract>
+                    <ows:Abstract>ABSTRACT OPT OPERATION-2 pre-processing</ows:Abstract>
                     <DataInputs>
 
                         <wps:Input minOccurs="1">
