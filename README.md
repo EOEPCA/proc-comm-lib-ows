@@ -71,8 +71,8 @@ The `Identifier` tag uniquely defines the element package ID
 <feed xmlns:owc="http://www.opengis.net/owc/1.0" xmlns="http://www.w3.org/2005/Atom"
       xmlns:example="http://www.example.com">
     <entry>
-        <identifier xmlns="http://purl.org/dc/elements/1.1/">application_package_dlr_s2_preproc</identifier>
-        <title type="text">Application package for DLR Sentinel-2 pre-p
+        <identifier xmlns="http://purl.org/dc/elements/1.1/">application_package_opt_ar2_preproc</identifier>
+        <title type="text">Application package for OPT MACHINE-2 pre-p
 ```
 
 The content tag, the child of offering, defines
@@ -84,7 +84,7 @@ The content tag, the child of offering, defines
 <owc:offering xmlns:owc="http://www.opengis.net/owc/1.0"
               code="http://www.opengis.net/spec/owc-atom/1.0/req/wps">
     <owc:content type="application/vnd.docker.distribution.manifest.v1+json"
-                 href="docker-co.example.com/the-operation:0.0.1.2"/>
+                 href="docker-qbert.example.com/the-operation:0.0.1.2"/>
     <owc:content type="application/cwl"
                  href="https://catalog.example.com/api/app-test/_applications/app-test/the-operation/0.0.1.2/the-operation.0.0.1.2-application.cwl"/>
 
