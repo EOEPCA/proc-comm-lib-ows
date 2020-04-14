@@ -32,7 +32,7 @@ TEST(eoepcaows_02, Get_entry_identifier) {
     EXPECT_EQ(1, entries.size());
 
     for (auto& entry : entries) {
-      EXPECT_EQ("application_package_dlr_s2_preproc",
+      EXPECT_EQ("application_package_sample_app",
                 entry->getPackageIdentifier());
     }
   }
@@ -91,9 +91,9 @@ TEST(eoepcaows_02, Get_ProcessDescription) {
         EXPECT_EQ(1, processDescriptions.size());
 
         for (auto& pd : processDescriptions) {
-          EXPECT_EQ("dlr-s2-preproc", pd->getIdentifier());
-          EXPECT_EQ("DLR Sentinel-2 pre-processing", pd->getTitle());
-          EXPECT_EQ("ABSTRACT DLR Sentinel-2 pre-processing",
+          EXPECT_EQ("sample-app", pd->getIdentifier());
+          EXPECT_EQ("A sample App", pd->getTitle());
+          EXPECT_EQ("Sample abstract",
                     pd->getAbstract());
         }
       }
