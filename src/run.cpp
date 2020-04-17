@@ -44,7 +44,7 @@ int main(int argc, const char** argv) {
         std::cout << "OFFERING CODE: " << off->getCode() << "\n";
 
         for (auto& y : off->getContents()) {
-          std::cout << "\t" << y.code << " " << y.href << "\n";
+          std::cout << "\t" << y.type << " " << y.href << "\n";
         }
 
         for (auto& proc : off->getProcessDescription()) {

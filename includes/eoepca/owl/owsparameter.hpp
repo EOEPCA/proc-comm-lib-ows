@@ -356,11 +356,11 @@ class ComplexData final : public Param {
 
 struct Content {
   std::string href{""};
-  std::string code{""};
+  std::string type{""};
   std::string tag{""};
 
   Content(std::string pCode, std::string pHref)
-      : code(std::move(pCode)), href(std::move(pHref)) {}
+      : type(std::move(pCode)), href(std::move(pHref)) {}
 };
 
 class OWSProcessDescription final : public Descriptor {
