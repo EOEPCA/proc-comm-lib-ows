@@ -264,6 +264,7 @@ class LiteralData final : public Param, public Values {
  public:
   std::string getType() override { return std::string("LiteralData"); }
   void setDataType(std::string data) { dataType = std::move(data); }
+  const std::string &getDataType() const { return dataType; }
 };
 
 class BoundingBoxData final : public Param, public Supported {
