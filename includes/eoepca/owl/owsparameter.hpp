@@ -395,7 +395,7 @@ class OWSProcessDescription final : public Descriptor {
 
 class OWSOffering {
   std::list<std::unique_ptr<OWSProcessDescription>> processDescription{};
-
+  std::string code{""};
   std::list<Content> contents{};
 
  public:
@@ -425,6 +425,9 @@ class OWSOffering {
       &getProcessDescription() const {
     return processDescription;
   }
+
+  const std::string &getCode() const { return code; }
+  void setCode(std::string theCode) { OWSOffering::code = std::move(theCode); }
 };
 
 class OWSEntry {

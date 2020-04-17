@@ -40,6 +40,9 @@ int main(int argc, const char** argv) {
       std::cout << theParams->getPackageIdentifier() << "\n";
 
       for (auto& off : theParams->getOfferings()) {
+
+        std::cout << "OFFERING CODE: " << off->getCode() << "\n";
+
         for (auto& y : off->getContents()) {
           std::cout << "\t" << y.code << " " << y.href << "\n";
         }

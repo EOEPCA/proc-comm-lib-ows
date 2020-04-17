@@ -220,12 +220,17 @@ void parseProcessDescription(
 
 void parseOffering(xmlNode* offering_node,
                    std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
+  xmlChar* code = xmlGetProp(offering_node, (const xmlChar*)"code");
+  if (code) {
+    ptrOffering->setCode(std::string(CHAR_BAD_CAST code));
+  }
+
   FOR(inner_cur_node, offering_node) {
     if (IS_CHECK(inner_cur_node, "content", XMLNS_OWC)) {
-      xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
+      xmlChar* type = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
       xmlChar* href = xmlGetProp(inner_cur_node, (const xmlChar*)"href");
 
-      ptrOffering->addContent(std::string(CHAR_BAD_CAST code),
+      ptrOffering->addContent(std::string(CHAR_BAD_CAST type),
                               std::string(CHAR_BAD_CAST href));
 
     } else if (IS_CHECK(inner_cur_node, "operation", XMLNS_OWC)) {
@@ -259,6 +264,7 @@ void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
 
       } else if (IS_CHECK(inner_cur_node, "offering", XMLNS_OWC)) {
         auto ptrOffering = std::make_unique<OWS::OWSOffering>();
+
         parseOffering(inner_cur_node, ptrOffering);
         owsEntry->moveAddOffering(ptrOffering);
       }
