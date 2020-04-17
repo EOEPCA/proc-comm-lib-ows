@@ -60,6 +60,8 @@ class Descriptor {
     Descriptor::version = std::move(pVersion);
   }
 
+  const std::string &getVersion() const { return version; }
+
   const std::string &getIdentifier() const { return identifier; }
   void setIdentifier(std::string pIdentifier) {
     Descriptor::identifier = std::move(pIdentifier);
