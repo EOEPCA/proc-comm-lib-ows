@@ -322,6 +322,7 @@ class ComplexData final : public Param {
 
  public:
   void setMaximumMegabytes(long pValue) { maximumMegabytes = pValue; }
+  long getMaximumMegabytes() const { return maximumMegabytes; }
   void setMaximumMegabytes(std::string pValue) {
     if (pValue.empty()) {
       maximumMegabytes = 0;
