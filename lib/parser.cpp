@@ -7,7 +7,9 @@
 #include <memory>
 #include <optional>
 
+#include "includes/httpfuntions.hpp"
 #include "includes/macro.hpp"
+#include "includes/yaml/yaml.hpp"
 //#define echo std::cout <<
 
 namespace EOEPCA {
@@ -218,6 +220,57 @@ void parseProcessDescription(
   }
 }
 
+void dumpCWLMODEL(const TOOLS::Object* m, int level) {
+  level++;
+  std::string tab = std::string((level * 2), ' ');
+  std::cout << tab << "id: \"" << m->getQ() << "\" val: \"" << m->getF() << "\""
+            << "\n";
+
+  for (auto& i : m->getChildren()) {
+    dumpCWLMODEL(i.get(), level);
+  }
+}
+
+void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
+  if (ptrOffering) {
+    for (auto& content : ptrOffering->getContents()) {
+      if (!content.tag.empty()) {
+        auto yamlCwl = std::make_unique<CWL::PARSER::YamlToObject>(
+            content.tag.c_str(), content.tag.size());
+        auto cwl = yamlCwl->parse();
+
+        auto pWorkflow = cwl->find("class", "Workflow");
+        if (pWorkflow) {
+          auto pInputs = pWorkflow->find("inputs", "");
+          if (pInputs->hasChildren()) {
+            for (auto& obj : pInputs->getChildren()) {
+              std::cout << obj->getQ() << " " << obj->getF() << "\n";
+            }
+          }
+
+          auto pOutputs = pWorkflow->find("outputs", "");
+          if (pOutputs->hasChildren()) {
+            for (auto& obj : pOutputs->getChildren()) {
+              std::cout << obj->getQ() << " " << obj->getF() << "\n";
+            }
+          }
+        }else{
+          //NO WORKFLOW!!
+        }
+      }
+    }
+  }
+
+  //  if (content.type == XML_CWL_TYPE) {
+  //
+  //    std::unique_ptr<TOOLS::Object> father{};
+  ////    CWL::PARSER::YamlToObject()
+  //
+  //
+  //
+  //  }
+}
+
 void parseOffering(xmlNode* offering_node,
                    std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   xmlChar* code = xmlGetProp(offering_node, (const xmlChar*)"code");
@@ -266,6 +319,21 @@ void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
         auto ptrOffering = std::make_unique<OWS::OWSOffering>();
 
         parseOffering(inner_cur_node, ptrOffering);
+
+        for (auto& content : ptrOffering->getContents()) {
+          if (content.type == XML_CWL_TYPE) {
+            auto res = getFromWeb(content.tag, content.href.c_str());
+            if (res != 200) {
+              std::string err{"href: "};
+              err.append(content.href).append(" can't be downloaded");
+              throw std::runtime_error(err);
+            }
+          }
+        }
+
+        if (ptrOffering->getCode() == OFFERING_CODE_CWL) {
+          parserOfferingCWL(ptrOffering);
+        }
         owsEntry->moveAddOffering(ptrOffering);
       }
     }

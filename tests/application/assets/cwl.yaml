@@ -1,0 +1,99 @@
+cwlVersion: v1.0
+$namespaces:
+  wps: http://www.opengis.net/wps/1.0.0
+  ows: http://www.opengis.net/ows/1.1
+  stac: http://www.me.net/stac/cwl/extension
+$graph:
+  - baseCommand: burned-area
+    class: CommandLineTool
+    hints:
+      DockerRequirement:
+        dockerPull: burned-area:0.6
+    id: burned-area
+    inputs:
+      arg1:
+        inputBinding:
+          position: 1
+          prefix: --ndvi_threshold
+        type: string
+      arg2:
+        inputBinding:
+          position: 2
+          prefix: --ndwi_threshold
+        type: string
+      arg3:
+        inputBinding:
+          position: 3
+          prefix: --base_dir
+          valueFrom: $(self.path)
+        type: Directory
+      arg4:
+        type: File
+        inputBinding:
+          position: 4
+          prefix: --post_event
+      arg5:
+        type: File
+        inputBinding:
+          position: 5
+          prefix: --pre_event
+    outputs:
+      results:
+        outputBinding:
+          glob: .
+        type: Any
+    requirements:
+      EnvVarRequirement:
+        envDef:
+          PATH: /opt/anaconda/envs/env_burned_area/bin/:/opt/anaconda/bin:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          PREFIX: /opt/anaconda/envs/env_burned_area
+      ResourceRequirement: {}
+  #  stderr: std.err
+  #  stdout: std.out
+  - class: Workflow
+    id: ogc-s2-burned-area # service id [WPS] map to wps:Input/ows:identifier
+    label: Sentinel-2 burned area # title [WPS] map to wps:Input/ows:title
+    doc: Sentinel-2 burned area with NDVI and NDWI # description [WPS] map to wps:Input/ows:abstract
+    inputs:
+      base_dir: Directory
+      ndvi_threshold: # parameter id [WPS] map to wps:Input/ows:identifier
+        doc: NDVI difference threshold # [WPS] maps to wps:Input/ows:abstract
+        label: NDVI difference threshold # [WPS] maps to wps:Input/ows:title
+        type: string
+      ndwi_threshold: # parameter id [WPS] map to wps:Input/ows:identifier
+        doc: NDWI difference threshold # [WPS] maps to wps:Input/ows:abstract
+        label: NDWI difference threshold # [WPS] maps to wps:Input/ows:title
+        type: string
+      post_event:
+        type: File
+        doc: Sentinel-2 Level-2A post-event description # [WPS] maps to wps:Input/ows:abstract
+        label: Sentinel-2 Level-2A post-event title
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: post_event
+      pre_event:
+        type: File
+        doc: Sentinel-2 Level-2A pre-event description # [WPS] maps to wps:Input/ows:abstract
+        label: Sentinel-2 Level-2A pre-event title
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: pre_event
+    outputs:
+      results: # parameter id [WPS] map to wps:Output/ows:identifier
+        label: Sentinel-2 Level-2A post-event title
+        outputSource:
+          - step1/results
+        type:
+          items: Directory
+          type: array
+    steps:
+      step1:
+        in:
+          arg1: ndvi_threshold
+          arg2: ndwi_threshold
+          arg3: base_dir
+          arg4: post_event
+          arg5: pre_event
+        out:
+          - results
+        run: '#burned-area'

@@ -14,6 +14,7 @@
 
 #define XML_COMPARE(X1,CHAR) (!xmlStrcmp(X1, (const xmlChar *) CHAR))
 #define OFFERING_CODE "http://www.opengis.net/tb13/eoc/wpsProcessOffering"
+#define OFFERING_CODE_CWL "http://www.opengis.net/eoc/applicationContext/cwl"
 #define IS_CHECK(NODE,V,NS) (!xmlStrcmp(NODE->name, (const xmlChar *) V) && !xmlStrcmp(NODE->ns->href, (const xmlChar *) NS))
 #define CHAR_BAD_CAST (char*)
 

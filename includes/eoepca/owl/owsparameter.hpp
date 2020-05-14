@@ -362,6 +362,7 @@ struct Content {
   std::string href{""};
   std::string type{""};
   std::string tag{""};
+  std::string err{""};
 
   Content(std::string pCode, std::string pHref)
       : type(std::move(pCode)), href(std::move(pHref)) {}
@@ -410,7 +411,11 @@ class OWSOffering {
   ~OWSOffering() = default;
 
  public:
-  const std::list<Content> &getContents() const { return contents; }
+  /**
+   * The content of the property tag could be altered by adding a value such as CWL
+   * @return
+   */
+  std::list<Content> &getContents()  { return contents; }
 
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {

@@ -14,8 +14,23 @@ find_package(LibXml2 REQUIRED)
 find_package(LibXslt REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 include_directories(${LIBXSLT_INCLUDE_DIR})
+
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
+
 #--------------------------------------------------------
 include_directories(includes)
+
+# YAML-CPP
+if((NOT DEFINED ENV{IMPORT_YAML_CPP}) OR ($ENV{IMPORT_YAML_CPP}))
+	execute_process(COMMAND ${CMAKE_SOURCE_DIR}/bin/download3ty.sh
+			RESULT_VARIABLE result
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+	set(YAML_CPP_BUILD_TESTS OFF: FORCE)
+	add_subdirectory(3ty/yaml-cpp-yaml-cpp-0.6.3)
+	include_directories(3ty/yaml-cpp-yaml-cpp-0.6.3/include)
+ENDIF()
 
 SET(MODS_LIBS
 		z m dl
@@ -26,20 +41,23 @@ SET(INCLUDE_SRC
 		includes/eoepca/owl/eoepcaows.hpp includes/eoepca/owl/owsparameter.hpp)
 
 SET(LIB_INCLUDE
-
+	lib/includes/yaml/yaml.hpp
+	lib/includes/yaml/yamlutils.hpp
+	lib/includes/yaml/object.hpp
 )
 
 SET(LIB_SRC
 		lib/eoepcaows.cpp
-		lib/parser.cpp lib/includes/parser.hpp includes/eoepca/owl/eoepcaows.hpp)
+		lib/parser.cpp lib/includes/parser.hpp includes/eoepca/owl/eoepcaows.hpp
+		)
 
 SET(MAIN_SRC 
 	src/run.cpp
 )
 
 
-add_library(eoepcaows SHARED ${LIB_SRC}  )
-TARGET_LINK_LIBRARIES(eoepcaows ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES} ${MODS_LIBS} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES})
+add_library(eoepcaows SHARED ${LIB_SRC} ${LIB_INCLUDE} )
+TARGET_LINK_LIBRARIES(eoepcaows yaml-cpp ${CURL_LIBRARIES} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES} ${MODS_LIBS} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES})
 
 add_executable(${RUNNER_NAME} ${INCLUDE_SRC} ${MAIN_SRC})
 TARGET_LINK_LIBRARIES(${RUNNER_NAME} ${MODS_LIBS} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES})
