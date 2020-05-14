@@ -68,7 +68,7 @@ class Descriptor {
   }
   const std::string &getTitle() const { return title; }
   void setTitle(const std::string &title) { Descriptor::title = title; }
-  const std::string &getAbstract() const { return abstract; }
+  const std::string & getAbstract() const { return abstract; }
   void setAbstract(const std::string &abstract) {
     Descriptor::abstract = abstract;
   }

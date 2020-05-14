@@ -8,6 +8,7 @@
 #define XMLNS_WPS1 "http://www.opengis.net/wps/1.0.0"
 #define XMLNS_OWS "http://www.opengis.net/ows/1.1"
 #define XMLNS_PURL "http://purl.org/dc/elements/1.1/"
+#define XMLNS_STAC "http://www.me.net/stac/cwl/extension"
 
 #define XML_DOCKER_TYPE "application/vnd.docker.distribution.manifest.v1+json"
 #define XML_CWL_TYPE "application/cwl"
@@ -19,13 +20,11 @@
 #define CHAR_BAD_CAST (char*)
 
 #define FNCMAP(N, T) #N, std::bind(&T, std::placeholders::_1)
-#define FNCMAPS(N, T) N, std::bind(&T, std::placeholders::_1)
+#define FNCMAPS(N, T) N, std::bind(&T, std::placeholders::_1,std::placeholders::_2)
 
 #define CWLTYPE_LIST \
-  { "null","boolean","int","long","float","double","string","File","Directory"}
+  { "null","boolean","int","long","float","double","string", "File", "Directory" }
 
-#define CWLTYPE_LIST_ARRAY \
-  { "int[]","long[]","float[]","double[]","string[]","File[]","Directory[]"}
 
 #define IS_INPUT(NODE,NS,CHAR) IS_CHECK(NODE, CHAR, NS) || XML_COMPARE(NODE->name, CHAR)
 

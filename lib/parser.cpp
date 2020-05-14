@@ -24,7 +24,24 @@ using MAP_PARSER =
     std::map<std::string,
              const std::function<std::unique_ptr<OWS::Param>(xmlNode*)> >;
 
-using fnccwl = std::unique_ptr<OWS::Param>(const TOOLS::Object*);
+auto getWithoutSquareBob = [](const std::string& type) -> std::string {
+  auto npos = type.find("[]");
+  if (npos != std::string::npos) {
+    return type.substr(0, npos);
+  }
+  return type;
+};
+
+auto hasNamespace = [](const std::string& val) -> std::string {
+  auto npos = val.find(":");
+  if (npos != std::string::npos) {
+    return val.substr(0, npos);
+  }
+  return std::string("");
+};
+
+using fnccwl = std::unique_ptr<OWS::Param>(const TOOLS::Object*,
+                                           const TOOLS::Object*);
 using tFnccwl = const std::function<fnccwl>;
 using MAP_PARSER_CWL = std::map<std::string, EOEPCA::tFnccwl>;
 
@@ -233,49 +250,129 @@ void dumpCWLMODEL(const TOOLS::Object* m, int level) {
   }
 }
 
-std::unique_ptr<OWS::Param> Enum(const TOOLS::Object* S) { return nullptr; }
+void getCWLInputDescriptor(const TOOLS::Object* namespaces,
+                           const TOOLS::Object* obj,
+                           EOEPCA::OWS::Descriptor& descriptor) {
+  std::string id, doc, label;
 
-std::unique_ptr<OWS::Param> Simple(const TOOLS::Object* S) {
-  std::cout << "---------------SIMPLE\n";
-  //  dumpCWLMODEL(S, 0);
+  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
+    id = obj->getQ();
+  }
 
+  if (id.empty()) {
+    if (!obj->isQlfEmpty()) {
+      id = obj->getQ();
+    }
+    if (id.empty()) {
+      id = obj->findAndReturnF("id", "", false);
+    }
+  }
 
+  label = obj->findAndReturnF("label", "", false);
+  doc = obj->findAndReturnF("doc", "", false);
+
+  if (label.empty()) label = id;
+  if (doc.empty()) doc = id;
+
+  descriptor.setIdentifier(id);
+  descriptor.setTitle(label);
+  descriptor.setAbstract(doc);
+}
+
+std::unique_ptr<OWS::Param> CWLTypeEnum(const TOOLS::Object* namespaces,
+                                        const TOOLS::Object* obj) {
+  EOEPCA::OWS::Descriptor descriptor;
+  getCWLInputDescriptor(namespaces, obj, descriptor);
+
+  auto name = obj->findAndReturnF("name", "", false);
+
+  //  descriptor.id?
+  //  descriptor.name?
+
+  return nullptr;
+}
+/***
+ *
+ * @param namespaces
+ * @param obj
+ * @return it type is null or the id is null --> returns null.
+ */
+std::unique_ptr<OWS::Param> CWLTypeParser(const TOOLS::Object* namespaces,
+                                          const TOOLS::Object* obj) {
+  std::cout << "---------------CWLTypeParser\n";
+  //  dumpCWLMODEL(obj,0);
+
+  bool isArray{false};
+  std::string type;
+
+  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
+    type = obj->getF();
+  }
+  if (type.empty()) {
+    type = obj->findAndReturnF("type", "", false);
+  }
+
+  auto a = type.find("[]");
+  if (a != std::string::npos) {
+    isArray = true;
+    type.replace(a, 2, "");
+  }
+
+  if (type == "null" || type == "null[]") {
+    return nullptr;
+  }
+
+  EOEPCA::OWS::Descriptor descriptor;
+  getCWLInputDescriptor(namespaces, obj, descriptor);
+
+  if (descriptor.getIdentifier().empty()) {
+    return nullptr;
+  }
+
+  auto theDefault = obj->findAndReturnF("default", "", false);
 
   return nullptr;
 }
 
-std::unique_ptr<OWS::Param> parseCwlInputsArray(const TOOLS::Object* S) {
-  std::cout << "---------------SimpleArray\n";
-  dumpCWLMODEL(S, 0);
-
-  return nullptr;
-}
-
-void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl, const TOOLS::Object* obj,
+void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
+                    const TOOLS::Object* namespaces, const TOOLS::Object* obj,
                     std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   if (!obj->hasChildren() && !obj->isQlfEmpty()) {
-    if (auto f = mapParserCwl[obj->getF()]) {
-      if (f) f(obj);
+    if (auto f = mapParserCwl[getWithoutSquareBob(obj->getF())]) {
+      if (f) f(namespaces, obj);
+    } else {
+      std::string err("type: ");
+      err.append(obj->getF()).append(" not supported");
+      throw std::runtime_error(err);
     }
   } else {
     auto theType = obj->find("type", "", false);
     if (theType) {
-      if (auto f = mapParserCwl[theType->getF()]) {
-        if (f) f(obj);
+      if (theType->hasChildren()) {
+        throw std::runtime_error(
+            "The ArraySchema type is supported only his simplification '[]'");
+      }
+      if (theType->getF() == "record") {
+        throw std::runtime_error("Type RecordSchema not supported yet");
+      }
+
+      if (auto f = mapParserCwl[getWithoutSquareBob(theType->getF())]) {
+        if (f) f(namespaces, obj);
+      } else {
+        std::string err("type: ");
+        err.append(obj->getF()).append(" not supported");
+        throw std::runtime_error(err);
       }
     }
   }
 }
-void parseCwlOutputs(MAP_PARSER_CWL& mapParserCwl, const TOOLS::Object* obj,
-                     std::unique_ptr<OWS::OWSOffering>& ptrOffering) {}
 
 void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   if (ptrOffering) {
     MAP_PARSER_CWL mapParser{};
-    for (auto& s : CWLTYPE_LIST) mapParser.emplace(FNCMAPS(s, Simple));
-    for (auto& s : CWLTYPE_LIST_ARRAY)
-      mapParser.emplace(FNCMAPS(s, parseCwlInputsArray));
-    mapParser.emplace(FNCMAPS("enum", Enum));
+    for (auto& s : CWLTYPE_LIST) mapParser.emplace(FNCMAPS(s, CWLTypeParser));
+
+    mapParser.emplace(FNCMAPS("enum", CWLTypeEnum));
 
     for (auto& content : ptrOffering->getContents()) {
       if (!content.tag.empty()) {
@@ -283,22 +380,18 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
             content.tag.c_str(), content.tag.size());
         auto cwl = yamlCwl->parse();
 
+        auto namespaces = cwl->find("$namespaces", "");
         auto pWorkflow = cwl->find("class", "Workflow");
         if (pWorkflow) {
-          auto pInputs = pWorkflow->find("inputs", "");
-          if (pInputs) {
-            if (pInputs->hasChildren()) {
-              for (auto& obj : pInputs->getChildren()) {
-                parseCwlInputs(mapParser, obj.get(), ptrOffering);
-              }
-            }
-          }
+          std::list<const TOOLS::Object*> toParse{
+              pWorkflow->find("inputs", ""), pWorkflow->find("outputs", "")};
 
-          auto pOutputs = pWorkflow->find("outputs", "");
-          if (pOutputs) {
-            if (pOutputs->hasChildren()) {
-              for (auto& obj : pOutputs->getChildren()) {
-                parseCwlOutputs(mapParser, obj.get(), ptrOffering);
+          for (auto& p : toParse) {
+            if (p) {
+              if (p->hasChildren()) {
+                for (auto& obj : p->getChildren()) {
+                  parseCwlInputs(mapParser, namespaces, obj.get(), ptrOffering);
+                }
               }
             }
           }
@@ -309,15 +402,6 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
       }
     }
   }
-
-  //  if (content.type == XML_CWL_TYPE) {
-  //
-  //    std::unique_ptr<TOOLS::Object> father{};
-  ////    CWL::PARSER::YamlToObject()
-  //
-  //
-  //
-  //  }
 }
 
 void parseOffering(xmlNode* offering_node,

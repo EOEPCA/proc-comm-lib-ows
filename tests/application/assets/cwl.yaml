@@ -78,14 +78,19 @@ $graph:
         stac:catalog:
           stac:href: catalog.json # optional. Default to 'catalog.json'.
           stac:collection_id: pre_event
+
     outputs:
       results: # parameter id [WPS] map to wps:Output/ows:identifier
         label: Sentinel-2 Level-2A post-event title
         outputSource:
           - step1/results
         type:
-          items: Directory
-          type: array
+          items: string
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: pre_event
+          stac:format: application/geo+json
+
     steps:
       step1:
         in:

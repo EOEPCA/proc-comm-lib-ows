@@ -100,6 +100,14 @@ class Object {
     return (!objects_.empty()) && qlf_.first.empty() && qlf_.second.empty();
   }
 
+  std::string findAndReturnF(const std::string &id, const std::string &value,
+                             bool depth = true) const {
+    auto t_ = find(id, value, depth);
+    if (t_) return t_->getF();
+
+    return std::string();
+  }
+
   const Object *find(const std::string &id, const std::string &value,
                      bool depth = true) const {
     if (qlf_.first == id && value.empty()) {
