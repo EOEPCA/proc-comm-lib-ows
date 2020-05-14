@@ -18,8 +18,16 @@
 #define IS_CHECK(NODE,V,NS) (!xmlStrcmp(NODE->name, (const xmlChar *) V) && !xmlStrcmp(NODE->ns->href, (const xmlChar *) NS))
 #define CHAR_BAD_CAST (char*)
 
-#define IS_INPUT(NODE,NS,CHAR) IS_CHECK(NODE, CHAR, NS) || XML_COMPARE(NODE->name, CHAR)
+#define FNCMAP(N, T) #N, std::bind(&T, std::placeholders::_1)
+#define FNCMAPS(N, T) N, std::bind(&T, std::placeholders::_1)
 
+#define CWLTYPE_LIST \
+  { "null","boolean","int","long","float","double","string","File","Directory"}
+
+#define CWLTYPE_LIST_ARRAY \
+  { "int[]","long[]","float[]","double[]","string[]","File[]","Directory[]"}
+
+#define IS_INPUT(NODE,NS,CHAR) IS_CHECK(NODE, CHAR, NS) || XML_COMPARE(NODE->name, CHAR)
 
 #define IS_FEED(D) if (!xmlStrcmp(D->name, (const xmlChar *) "feed") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_ATOM))
 #define IS_OFFERING(D) if (!xmlStrcmp(D->name, (const xmlChar *) "offering") && !xmlStrcmp(D->ns->href, (const xmlChar *) XMLNS_OWC))

@@ -48,6 +48,8 @@ class Object {
     return std::nullopt;
   }
 
+  bool isQlfEmpty() const { return qlf_.first.empty() && qlf_.second.empty(); }
+
   const std::pair<std::string, std::string> &getQlf() const { return qlf_; }
   void setQlf(const Qlf &qlf) { qlf_ = qlf; }
   void setQlf(const std::string &q, const std::string &f) {
@@ -94,11 +96,12 @@ class Object {
     objects_.emplace_back(object.release());
   }
 
-  bool isArray() {
+  bool isArray() const {
     return (!objects_.empty()) && qlf_.first.empty() && qlf_.second.empty();
   }
 
-  const Object *find(const std::string &id, const std::string &value) const {
+  const Object *find(const std::string &id, const std::string &value,
+                     bool depth = true) const {
     if (qlf_.first == id && value.empty()) {
       return this;
     }
@@ -116,9 +119,11 @@ class Object {
         return this;
       }
 
-      auto k = m->find(id, value);
-      if (k) {
-        return k;
+      if (depth) {
+        auto k = m->find(id, value);
+        if (k) {
+          return k;
+        }
       }
     }
 
