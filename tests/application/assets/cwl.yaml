@@ -72,25 +72,22 @@ $graph:
           stac:href: catalog.json # optional. Default to 'catalog.json'.
           stac:collection_id: post_event
       pre_event:
-        type: File
+        type: File[]
         doc: Sentinel-2 Level-2A pre-event description # [WPS] maps to wps:Input/ows:abstract
         label: Sentinel-2 Level-2A pre-event title
         stac:catalog:
           stac:href: catalog.json # optional. Default to 'catalog.json'.
           stac:collection_id: pre_event
-
     outputs:
       results: # parameter id [WPS] map to wps:Output/ows:identifier
         label: Sentinel-2 Level-2A post-event title
         outputSource:
           - step1/results
-        type:
-          items: string
+        type: File
         stac:catalog:
           stac:href: catalog.json # optional. Default to 'catalog.json'.
           stac:collection_id: pre_event
           stac:format: application/geo+json
-
     steps:
       step1:
         in:

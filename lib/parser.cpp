@@ -331,15 +331,24 @@ std::unique_ptr<OWS::Param> CWLTypeParser(const TOOLS::Object* namespaces,
 
   auto theDefault = obj->findAndReturnF("default", "", false);
 
-  return nullptr;
+  auto literData = std::make_unique<OWS::LiteralData>();
+
+  return literData;
 }
 
 void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
                     const TOOLS::Object* namespaces, const TOOLS::Object* obj,
-                    std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
+                    OWS::OWSProcessDescription* processDescription,
+                    std::string_view type) {
+  // ptrToNull
+  auto fnc = mapParserCwl[""];
+
   if (!obj->hasChildren() && !obj->isQlfEmpty()) {
     if (auto f = mapParserCwl[getWithoutSquareBob(obj->getF())]) {
-      if (f) f(namespaces, obj);
+      std::unique_ptr<OWS::Param> ptrParan(nullptr);
+      if (f) ptrParan = f(namespaces, obj);
+
+      processDescription->addMoveInput(ptrParan);
     } else {
       std::string err("type: ");
       err.append(obj->getF()).append(" not supported");
@@ -357,7 +366,10 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
       }
 
       if (auto f = mapParserCwl[getWithoutSquareBob(theType->getF())]) {
-        if (f) f(namespaces, obj);
+        std::unique_ptr<OWS::Param> ptrParan(nullptr);
+        if (f) ptrParan = f(namespaces, obj);
+        processDescription->addMoveInput(ptrParan);
+
       } else {
         std::string err("type: ");
         err.append(obj->getF()).append(" not supported");
@@ -383,6 +395,9 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
         auto namespaces = cwl->find("$namespaces", "");
         auto pWorkflow = cwl->find("class", "Workflow");
         if (pWorkflow) {
+          auto processDescription =
+              std::make_unique<OWS::OWSProcessDescription>();
+
           std::list<const TOOLS::Object*> toParse{
               pWorkflow->find("inputs", ""), pWorkflow->find("outputs", "")};
 
@@ -390,11 +405,14 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
             if (p) {
               if (p->hasChildren()) {
                 for (auto& obj : p->getChildren()) {
-                  parseCwlInputs(mapParser, namespaces, obj.get(), ptrOffering);
+                  parseCwlInputs(mapParser, namespaces, obj.get(),
+                                 processDescription.get(), p->getQ());
                 }
               }
             }
           }
+
+          ptrOffering->moveAddProcessDescription(processDescription);
 
         } else {
           // NO WORKFLOW!!
