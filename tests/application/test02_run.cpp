@@ -107,10 +107,10 @@ TEST(eoepcaows_02, processDescription_parameters) {
           std::cout << "getAbstract: " << processDescription->getAbstract()
                     << "\n";
 
-          EXPECT_EQ(processDescription->getIdentifier(), "ogc-s2-burned-area");
-          EXPECT_EQ(processDescription->getTitle(), "Sentinel-2 burned area");
+          EXPECT_EQ(processDescription->getIdentifier(), "test-WF-area");
+          EXPECT_EQ(processDescription->getTitle(), "test-WF area");
           EXPECT_EQ(processDescription->getAbstract(),
-                    "Sentinel-2 burned area with NDVI and NDWI");
+                    "test-WF burned area with NDVI and NDWI");
         }
       }
     }
