@@ -309,19 +309,6 @@ void getCWLInputDescriptor(const NamespaceCWL* namespaces,
   descriptor.setAbstract(doc);
 }
 
-//TODO:
-std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
-                                        const TOOLS::Object* obj) {
-  EOEPCA::OWS::Descriptor descriptor;
-  getCWLInputDescriptor(namespaces, obj, descriptor);
-
-  auto name = obj->findAndReturnF("name", "", false);
-
-
-
-  return nullptr;
-}
-
 std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     const NamespaceCWL* namespaces, const TOOLS::Object* obj,
     EOEPCA::OWS::Descriptor& descriptor) {
@@ -368,6 +355,19 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
 
     literData->setDataType(descriptor.getTag());
     literData->setDefault(obj->findAndReturnF("default", "", false));
+
+    if (descriptor.getTag() == "enum") {
+      literData->setDataType("string");
+      auto symbols = obj->find("symbols", "", false);
+      if (symbols) {
+        for (auto& a : symbols->getChildren()) {
+          literData->addAllowedValues(a->getF());
+          if (literData->getDefaultValue().empty()) {
+            literData->setDataType(a->getF());
+          }
+        }
+      }
+    }
 
     // AllowedValues???
     theReturnParam.reset(literData.release());
@@ -478,6 +478,46 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
   }
 }
 
+std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
+                                        const TOOLS::Object* obj) {
+  bool isArray{false};
+  std::string type;
+
+  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
+    type = obj->getF();
+  }
+  if (type.empty()) {
+    type = obj->findAndReturnF("type", "", false);
+  }
+
+  auto a = type.find("[]");
+  if (a != std::string::npos) {
+    isArray = true;
+    type.replace(a, 2, "");
+  }
+
+  if (type == "null" || type == "null[]") {
+    return nullptr;
+  }
+
+  EOEPCA::OWS::Descriptor descriptor;
+  descriptor.setTag(type);
+  descriptor.setIsArray(isArray);
+  getCWLInputDescriptor(namespaces, obj, descriptor);
+
+  if (descriptor.getIdentifier().empty()) {
+    descriptor.setIdentifier(obj->findAndReturnF("name", "", false));
+  }
+
+  if (descriptor.getIdentifier().empty()) {
+    return nullptr;
+  }
+
+  return CWLTypeParserSpecialization(namespaces, obj, descriptor);
+
+  return nullptr;
+}
+
 void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   if (ptrOffering) {
     MAP_PARSER_CWL mapParser{};
@@ -500,7 +540,8 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
           auto processDescription =
               std::make_unique<OWS::OWSProcessDescription>();
 
-          processDescription->setIdentifier( pWorkflow->findAndReturnF("id", "", false));
+          processDescription->setIdentifier(
+              pWorkflow->findAndReturnF("id", "", false));
           processDescription->setTitle(
               pWorkflow->findAndReturnF("label", "", false));
           processDescription->setAbstract(
