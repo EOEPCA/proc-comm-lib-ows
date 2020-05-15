@@ -309,6 +309,7 @@ void getCWLInputDescriptor(const NamespaceCWL* namespaces,
   descriptor.setAbstract(doc);
 }
 
+//TODO:
 std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
                                         const TOOLS::Object* obj) {
   EOEPCA::OWS::Descriptor descriptor;
@@ -316,8 +317,7 @@ std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
 
   auto name = obj->findAndReturnF("name", "", false);
 
-  //  descriptor.id?
-  //  descriptor.name?
+
 
   return nullptr;
 }

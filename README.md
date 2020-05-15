@@ -150,7 +150,50 @@ From the version v1.2 has been added the possibility to create the EOEPCA/ADES f
 </feed>
 ```
 
+```yaml
+...
+- class: Workflow
+    id: test-WF-area # service id [WPS] map to wps:Input/ows:identifier
+    label: test-WF area # title [WPS] map to wps:Input/ows:title
+    doc: test-WF burned area with NDVI and NDWI # description [WPS] map to wps:Input/ows:abstract
+    inputs:
+      base_dir: Directory
+      test_threshold: # parameter id [WPS] map to wps:Input/ows:identifier
+        doc: TEST difference threshold # [WPS] maps to wps:Input/ows:abstract
+        label: TEST difference threshold # [WPS] maps to wps:Input/ows:title
+        type: string
+      test2_threshold: # parameter id [WPS] map to wps:Input/ows:identifier
+        doc: TEST2 difference threshold # [WPS] maps to wps:Input/ows:abstract
+        label: TEST2 difference threshold # [WPS] maps to wps:Input/ows:title
+        type: string
+      post_event:
+        type: File
+        doc: Sentinel-bb Level-TEST post-event description # [WPS] maps to wps:Input/ows:abstract
+        label: Sentinel-bb Level-TEST post-event title
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: post_event
+      pre_event:
+        type: File[]
+        doc: Sentinel-bb Level-TEST pre-event description # [WPS] maps to wps:Input/ows:abstract
+        label: Sentinel-bb Level-TEST pre-event title
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: pre_event
+    outputs:
+      results: # parameter id [WPS] map to wps:Output/ows:identifier
+        label: Sentinel-bb Level-TEST post-event title
+        outputSource:
+          - step1/results
+        type: File
+        stac:catalog:
+          stac:href: catalog.json # optional. Default to 'catalog.json'.
+          stac:collection_id: pre_event
+          stac:format: application/geo+json
+    steps:
 
+...
+```
 
 ### Built With
 
@@ -220,46 +263,8 @@ For this example we'll use the ready-made Docker Image `eoepca/eoepca-build-cpp:
 
 3. Build application
 
-Let's prepare the environment variables
-
-```shell
-export LOCAL_DOCKERIMAGE='eoepca/eoepca-build-cpp:1.0'
-export CMAKERELEASE='Release'
-```
-
-Prepare the makefile
-
-```shel
-docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} cmake -DCMAKE_BUILD_TYPE=${CMAKERELEASE} -G "CodeBlocks - Unix Makefiles" ..
-```
-
-... and make
-
-```shel
-docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} make
-```
-
-list directory
-
-```shell
-ls -ltr build/
-```
-
-expected results:
-
-```shell
-[qbert@mycase proc-comm-lib-ows]$ ls -ltr build/
-total 240
--rw-r--r-- 1 root root 56748 Apr  7 12:36 CMakeCache.txt
--rw-r--r-- 1 root root 11131 Apr  7 12:36 Makefile
--rw-r--r-- 1 root root  1626 Apr  7 12:36 cmake_install.cmake
-drwxr-xr-x 2 root root  4096 Apr  7 12:36 bin
--rw-r--r-- 1 root root 31776 Apr  7 12:36 eoepcaows.cbp
--rwxr-xr-x 1 root root 96856 Apr  7 12:36 libeoepcaows.so
--rwxr-xr-x 1 root root 20704 Apr  7 12:36 runner
-drwxr-xr-x 2 root root  4096 Apr  7 12:37 lib
-drwxr-xr-x 6 root root  4096 Apr  7 12:37 tests
-drwxr-xr-x 6 root root  4096 Apr  7 12:37 CMakeFiles
+```shell script
+./scripts/build.sh
 ```
 
 The library has been created `libeoepcaows.so`
@@ -270,11 +275,13 @@ The library has been created `libeoepcaows.so`
 
 - [LibXml2](http://xmlsoft.org/)
 - [LibXslt](http://xmlsoft.org/)
+- [libcurl](https://curl.haxx.se/libcurl/)
 
 from the root of the repository
 
 ```shell
- ./build/tests/libtest-test --gtest_break_on_failure
+cd demo/
+./libtest-test --gtest_break_on_failure
 ```
 
 runs only the unit tests
