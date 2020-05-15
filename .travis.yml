@@ -18,14 +18,6 @@ jobs:
      install: skip
      script: travis/build.sh
 
-#    - stage: container creation and publishing
-#      install: skip
-#      script: travis/containerCreation.sh
-
-    # - stage: smoke and acceptance test
-    #   install: skip
-    #   script: travis/acceptanceTest.sh
-
     - stage: release
       if: branch = master AND NOT type IN (pull_request)
       install: skip
