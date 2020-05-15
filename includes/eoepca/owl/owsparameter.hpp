@@ -16,6 +16,8 @@ class Descriptor {
   std::string title{""};
   std::string abstract{""};
   std::string version{""};
+  std::string tag{""};
+  bool isArray{false};
 
  public:
   Descriptor() = default;
@@ -23,13 +25,18 @@ class Descriptor {
       : identifier(other.identifier),
         title(other.title),
         version(other.version),
-        abstract(other.abstract) {}
+        abstract(other.abstract),
+        tag(other.tag),
+        isArray(other.isArray)
+        {}
 
   Descriptor(Descriptor &&other) noexcept(false)
       : identifier(std::move(other.identifier)),
         title(std::move(other.title)),
         abstract(std::move(other.abstract)),
-        version(std::move(other.version)) {}
+        version(std::move(other.version)),
+        tag(std::move(other.tag)),
+        isArray(other.isArray){}
 
   Descriptor &operator=(const Descriptor &other) {
     if (this == &other) return *this;
@@ -38,6 +45,8 @@ class Descriptor {
     title = other.title;
     abstract = other.abstract;
     version = other.version;
+    tag = other.tag;
+    isArray = other.isArray;
 
     return *this;
   }
@@ -49,6 +58,8 @@ class Descriptor {
     title = std::move(other.title);
     abstract = std::move(other.abstract);
     version = std::move(other.version);
+    tag = std::move(other.tag);
+    isArray = other.isArray;
 
     return *this;
   }
@@ -72,6 +83,12 @@ class Descriptor {
   void setAbstract(const std::string &abstract) {
     Descriptor::abstract = abstract;
   }
+
+  const std::string &getTag() const { return tag; }
+  void setTag(const std::string &tag) { Descriptor::tag = tag; }
+
+  bool isArrayVal() const { return isArray; }
+  void setIsArray(bool isArray) { Descriptor::isArray = isArray; }
 };
 
 class Occurs {
@@ -312,10 +329,11 @@ class ComplexData final : public Param {
 
   long maximumMegabytes = 0;
 
+  std::string defaultString{""};
  public:
   ComplexData() = default;
 
-  ComplexData(const LiteralData &) = delete;
+  ComplexData(const ComplexData &) = delete;
   ComplexData(ComplexData &&) = delete;
 
   ~ComplexData() override = default;
@@ -355,6 +373,11 @@ class ComplexData final : public Param {
 
   const std::unique_ptr<Format> &getDefaultSupported() const {
     return defaultSupported;
+  }
+
+  const std::string &getDefaultString() const { return defaultString; }
+  void setDefaultString(const std::string &defaultString) {
+    ComplexData::defaultString = defaultString;
   }
 };
 
