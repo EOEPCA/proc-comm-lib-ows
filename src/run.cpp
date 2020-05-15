@@ -51,7 +51,6 @@ int main(int argc, const char** argv) {
           std::cout << proc->getIdentifier() << "\n";
           std::cout << proc->getTitle() << "\n";
           std::cout << proc->getAbstract() << "\n";
-
           std::cout << "theParams SIZE INPUT: " << proc->getInputs().size()
                     << "\n";
           std::cout << "theParams SIZE OUTPUT: " << proc->getOutputs().size();
@@ -59,6 +58,5 @@ int main(int argc, const char** argv) {
       }
     }
   }
-
   return 0;
 }
