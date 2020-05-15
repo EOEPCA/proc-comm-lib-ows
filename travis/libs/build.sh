@@ -23,13 +23,8 @@ else
 	LOCAL_DOCKERIMAGE=${BUILDER_ENV_IMAGE}
 fi
 
-
 echo "Docker image: ${LOCAL_DOCKERIMAGE}"
 
 
-#CMAKE
-docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} cmake -DCMAKE_BUILD_TYPE=${CMAKERELEASE} -G "CodeBlocks - Unix Makefiles" ..
-#make
-docker run --rm -ti  -v $PWD:/project/ -w /project/build/  ${LOCAL_DOCKERIMAGE} make
 
 

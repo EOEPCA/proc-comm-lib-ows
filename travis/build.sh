@@ -23,8 +23,8 @@ then
 
 else
 
-    source travis/libs/build.sh
+  source travis/libs/build.sh
 
-   docker run --rm -ti  -v $PWD:/project/ -w /project  ${LOCAL_DOCKERIMAGE} ./build/tests/libtest-test --gtest_break_on_failure
+  source scripts/build.sh
 
 fi

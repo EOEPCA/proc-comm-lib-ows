@@ -1,20 +1,30 @@
 #!/usr/bin/env bash
 
-set -euov pipefail
-
-
+#import globals
 source travis/variables.sh
 
-pullTag=${EOEPCA_REPOSITORY}/${SERVICE_NAME}:$buildTag
-releaseTag=${EOEPCA_REPOSITORY}/${SERVICE_NAME}:release_${buildTag}
-latestTag=${EOEPCA_REPOSITORY}/${SERVICE_NAME}:latest
+if [ "${TRAVIS}" != "true" ]
+then
 
-echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+	cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S . -B build/
+	if [ $? -ne 0 ]
+	then
+		echo "CMAKE prepare failed"
+		exit
+	fi
 
-docker pull ${pullTag}
+	cmake --build build/  --target all -- -j 2
+  if [ $? -ne 0 ]
+  then
+    echo "Build failed"
+		exit
+  fi
 
-docker tag ${pullTag} ${releaseTag}
-docker push ${releaseTag}
 
-docker tag ${pullTag} ${latestTag}
-docker push ${latestTag}
+else
+
+  source travis/libs/build.sh
+
+  source scripts/build.sh
+
+fi

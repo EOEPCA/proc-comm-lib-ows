@@ -10,9 +10,9 @@
 #include <sstream>
 
 class Util {
-  const char* ows1 = "tests/application/assets/ows1.xml";
-  const char* libLinux = "build/libeoepcaows.dylib";
-  const char* libMac = "build/libeoepcaows.so";
+  const char* ows1 = "ows2.xml";
+  const char* libLinux = "libeoepcaows.dylib";
+  const char* libMac = "libeoepcaows.so";
 
  public:
   std::string getLibName() {

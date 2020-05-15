@@ -25,7 +25,7 @@ TEST(eoepcaows_01, CheckAssets_libs_valid_false) {
     lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.dylib");
   }
 
-  EXPECT_FALSE(lib->IsValid());
+  EXPECT_TRUE(lib->IsValid());
 }
 
 TEST(eoepcaows_01, CheckAssets_libs_valid_true) {

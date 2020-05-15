@@ -62,6 +62,9 @@ TARGET_LINK_LIBRARIES(eoepcaows yaml-cpp ${CURL_LIBRARIES} ${LIBXML2_LIBRARIES} 
 add_executable(${RUNNER_NAME} ${INCLUDE_SRC} ${MAIN_SRC})
 TARGET_LINK_LIBRARIES(${RUNNER_NAME} ${MODS_LIBS} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES})
 
+
+if((NOT DEFINED ENV{RUN_TESTS}) OR ($ENV{RUN_TESTS}))
 add_subdirectory(tests)
+ENDIF()
 
 #/Users/rdirienzo/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake

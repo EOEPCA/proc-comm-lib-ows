@@ -14,6 +14,7 @@ jobs:
      script: travis/builderContainerCreation.sh
 
    - stage: build (compile, unit test, package)
+     if: branch = develop AND NOT type IN (pull_request)
      install: skip
      script: travis/build.sh
 
@@ -25,10 +26,10 @@ jobs:
     #   install: skip
     #   script: travis/acceptanceTest.sh
 
-    # - stage: release
-    #   if: branch = master AND NOT type IN (pull_request)
-    #   install: skip
-    #   script: travis/release.sh
+    - stage: release
+      if: branch = master AND NOT type IN (pull_request)
+      install: skip
+      script: travis/release.sh
 
 import:
   - docs/.travis.yml

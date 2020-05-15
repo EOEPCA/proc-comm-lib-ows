@@ -357,10 +357,10 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     }
   }
 
-  if (!theReturnParam) {
-    // looking for WPS info
-    std::string wpsNamespace(namespaces->getWps());
-  }
+  //  if (!theReturnParam) {
+  //    // looking for WPS info
+  //    std::string wpsNamespace(namespaces->getWps());
+  //  }
 
   if (!theReturnParam) {
     // it is a Literaldata
@@ -369,7 +369,8 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     literData->setDataType(descriptor.getTag());
     literData->setDefault(obj->findAndReturnF("default", "", false));
 
-    //AllowedValues???
+    // AllowedValues???
+    theReturnParam.reset(literData.release());
   }
 
   if (theReturnParam) {
@@ -382,6 +383,10 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     }
   }
 
+  //  std::cout << "descriptor: " << descriptor.getTag()
+  //            << " is null:" << (theReturnParam ? "TRUE" : "NULL")
+  //            << " ID: " << descriptor.getIdentifier()
+  //            << "\n";
   return theReturnParam;
 }
 
@@ -393,7 +398,7 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
  */
 std::unique_ptr<OWS::Param> CWLTypeParser(const NamespaceCWL* namespaces,
                                           const TOOLS::Object* obj) {
-  std::cout << "---------------CWLTypeParser\n";
+  //  std::cout << "---------------CWLTypeParser\n";
   //  dumpCWLMODEL(obj,0);
 
   bool isArray{false};
@@ -494,6 +499,23 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
         if (pWorkflow) {
           auto processDescription =
               std::make_unique<OWS::OWSProcessDescription>();
+
+          processDescription->setIdentifier( pWorkflow->findAndReturnF("id", "", false));
+          processDescription->setTitle(
+              pWorkflow->findAndReturnF("label", "", false));
+          processDescription->setAbstract(
+              pWorkflow->findAndReturnF("doc", "", false));
+          if (processDescription->getTitle().empty()) {
+            processDescription->setTitle("NotDefined");
+          }
+
+          if (processDescription->getAbstract().empty()) {
+            if (!processDescription->getTitle().empty()) {
+              processDescription->setAbstract(processDescription->getTitle());
+            } else {
+              processDescription->setAbstract("NotDefined");
+            }
+          }
 
           std::list<const TOOLS::Object*> toParse{
               pWorkflow->find("inputs", ""), pWorkflow->find("outputs", "")};
