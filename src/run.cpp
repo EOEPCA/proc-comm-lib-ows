@@ -14,7 +14,6 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  //build *inix
   auto lib = std::make_unique<EOEPCA::EOEPCAows>("./libeoepcaows.so");
   if (!lib->IsValid()) {
     //build mac
