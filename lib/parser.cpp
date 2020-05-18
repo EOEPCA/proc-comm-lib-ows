@@ -539,7 +539,7 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
         if (pWorkflow) {
           auto processDescription =
               std::make_unique<OWS::OWSProcessDescription>();
-
+          processDescription->setDescriber(content.tag);
           processDescription->setIdentifier(
               pWorkflow->findAndReturnF("id", "", false));
           processDescription->setTitle(

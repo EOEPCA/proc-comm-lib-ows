@@ -395,6 +395,8 @@ class OWSProcessDescription final : public Descriptor {
   std::list<std::unique_ptr<Param>> inputs;
   std::list<std::unique_ptr<Param>> outputs;
 
+  std::string describer{""};
+
  public:
   OWSProcessDescription() = default;
   OWSProcessDescription(const OWSProcessDescription &) = delete;
@@ -418,6 +420,11 @@ class OWSProcessDescription final : public Descriptor {
   const std::list<std::unique_ptr<Param>> &getInputs() const { return inputs; }
   const std::list<std::unique_ptr<Param>> &getOutputs() const {
     return outputs;
+  }
+
+  const std::string &getDescriber() const { return describer; }
+  void setDescriber(const std::string &describer) {
+    OWSProcessDescription::describer = describer;
   }
 };
 
