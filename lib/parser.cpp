@@ -551,87 +551,6 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
   return theReturnParam;
 }
 
-std::unique_ptr<OWS::Param> CWLTypeParserSpecialization2(
-    const NamespaceCWL* namespaces, const TOOLS::Object* obj,
-    EOEPCA::OWS::Descriptor& descriptor, TypeCWL* typeCWL) {
-  std::unique_ptr<OWS::Param> theReturnParam{nullptr};
-
-  if (!namespaces->getStac().empty()) {
-    std::string stacCatalog(namespaces->getStac());
-    stacCatalog.append(":catalog");
-
-    auto stacCatalogObj = obj->find(stacCatalog, "", false);
-    if (stacCatalogObj) {
-      // IS A COMPLEX DATA
-      // looking for stac:catalog::format
-      std::string stacCatalogFormat(namespaces->getStac());
-      stacCatalogFormat.append(":format");
-
-      auto stacFormat = stacCatalogObj->findAndReturnF(stacCatalogFormat, "");
-      if (stacFormat.empty()) {
-        stacFormat = CWL_STACF_ORMAT_DEFAULT;
-      }
-
-      auto cd = std::make_unique<OWS::ComplexData>();
-      auto format = std::make_unique<OWS::Format>();
-      auto defaultFormat = std::make_unique<OWS::Format>();
-      format->setMimeType(stacFormat);
-      defaultFormat->setMimeType(stacFormat);
-      cd->moveDefaultSupported(defaultFormat);
-      cd->moveAddSupported(format);
-
-      cd->setDefaultString(obj->findAndReturnF("default", "", false));
-
-      theReturnParam.reset(cd.release());
-    }
-  }
-
-  //  if (!theReturnParam) {
-  //    // looking for WPS info
-  //    std::string wpsNamespace(namespaces->getWps());
-  //  }
-
-  if (!theReturnParam) {
-    // it is a Literaldata
-    auto literData = std::make_unique<OWS::LiteralData>();
-
-    literData->setDataType(descriptor.getTag());
-    literData->setDefault(obj->findAndReturnF("default", "", false));
-
-    if (descriptor.getTag() == "enum") {
-      literData->setDataType("string");
-      auto symbols = obj->find("symbols", "", false);
-      if (symbols) {
-        for (auto& a : symbols->getChildren()) {
-          literData->addAllowedValues(a->getF());
-          if (literData->getDefaultValue().empty()) {
-            literData->setDataType(a->getF());
-          }
-        }
-      }
-    }
-
-    // AllowedValues???
-    theReturnParam.reset(literData.release());
-  }
-
-  if (theReturnParam) {
-    theReturnParam->setTitle(descriptor.getTitle());
-    theReturnParam->setAbstract(descriptor.getAbstract());
-    theReturnParam->setIdentifier(descriptor.getIdentifier());
-    theReturnParam->setMinOccurs(1);
-    if (descriptor.isArrayVal()) {
-      theReturnParam->setMaxOccurs(999);
-    }
-  }
-
-  //  echo << "descriptor: " << descriptor.getTag()
-  //            << " is null:" << (theReturnParam ? "TRUE" : "NULL")
-  //            << " ID: " << descriptor.getIdentifier()
-  //            << "\n";
-  return theReturnParam;
-}
-
 /***
  *
  * @param namespaces
@@ -723,6 +642,21 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
               pWorkflow->findAndReturnF("doc", "", false));
           if (processDescription->getTitle().empty()) {
             processDescription->setTitle("NotDefined");
+          }
+
+          if (!namespaceCWL->getOws().empty()) {
+            std::string owsVersion{namespaceCWL->getOws()};
+            owsVersion.append(":version");
+
+            processDescription->setVersion(
+                pWorkflow->findAndReturnF(owsVersion, "", false));
+            if (processDescription->getVersion().empty()) {
+
+              dumpCWLMODEL(pWorkflow,0);
+
+              std::string err{"Workflow version empty."};
+              throw std::runtime_error(err);
+            }
           }
 
           if (processDescription->getAbstract().empty()) {

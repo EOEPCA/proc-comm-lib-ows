@@ -107,10 +107,14 @@ TEST(eoepcaows_02, processDescription_parameters) {
           std::cout << "getAbstract: " << processDescription->getAbstract()
                     << "\n";
 
-          EXPECT_EQ(processDescription->getIdentifier(), "test-WF-area");
-          EXPECT_EQ(processDescription->getTitle(), "test-WF area");
+          std::cout << "getVersion: " << processDescription->getVersion() << "\n";
+
+          EXPECT_EQ(processDescription->getIdentifier(), "eo_metadata_generation");
+          EXPECT_EQ(processDescription->getTitle(), "Earth Observation Metadata Generation");
           EXPECT_EQ(processDescription->getAbstract(),
-                    "test-WF burned area with NDVI and NDWI");
+                    "Earth Observation Metadata Generation");
+          EXPECT_EQ(processDescription->getVersion(),
+                    "1.0");
         }
       }
     }
