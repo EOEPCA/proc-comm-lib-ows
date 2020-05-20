@@ -9,6 +9,8 @@
 #include <string>
 
 int main(int argc, const char** argv) {
+
+
   if (argc == 1) {
     std::cerr << "arg1: ows file path";
     return 1;

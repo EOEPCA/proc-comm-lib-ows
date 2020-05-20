@@ -26,7 +26,7 @@
 
 #define FNCMAP(N, T) #N, std::bind(&T, std::placeholders::_1)
 #define FNCMAPS(N, T) \
-  N, std::bind(&T, std::placeholders::_1, std::placeholders::_2)
+  N, std::bind(&T, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
 
 #define CWL_NAMESPACE \
   { XMLNS_STAC, XMLNS_WPS1 }

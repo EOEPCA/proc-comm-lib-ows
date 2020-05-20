@@ -10,9 +10,151 @@
 #include "includes/httpfuntions.hpp"
 #include "includes/macro.hpp"
 #include "includes/yaml/yaml.hpp"
-//#define echo std::cout <<
+#define echo std::cout
 
 namespace EOEPCA {
+
+void dumpCWLMODEL(const TOOLS::Object* m, int level) {
+  level++;
+  std::string tab = std::string((level * 2), ' ');
+  echo << tab << "id: \"" << m->getQ() << "\" val: \"" << m->getF() << "\""
+       << "\n";
+  for (auto& i : m->getChildren()) {
+    dumpCWLMODEL(i.get(), level);
+  }
+}
+
+class TypeCWL {
+  std::string typeBase_{""};
+  std::string typeParsed_{""};
+  std::list<std::string> symbols_{};
+
+  bool array_{false};
+  bool optional_{false};
+
+  bool good_{false};
+  std::string error_{"value is empty"};
+
+ private:
+  void setError(std::string_view e) {
+    if (e.empty()) {
+      good_ = true;
+      error_.clear();
+    } else {
+      good_ = false;
+      error_ = e;
+    }
+  }
+
+  void resetError() {
+    good_ = false;
+    error_ = "value is empty";
+  }
+  void resetVals() {
+    typeBase_.clear();
+    typeParsed_.clear();
+    symbols_.clear();
+    array_ = false;
+    optional_ = false;
+  }
+
+  void setOtherValue() {
+    auto nposBob = typeBase_.find("[]");
+    array_ = (nposBob != std::string::npos);
+    auto nposQM = typeBase_.find("?");
+    optional_ = (nposQM != std::string::npos);
+
+    typeParsed_ = typeBase_;
+    std::list<std::string> list{"[]", "?"};
+
+    for (auto& s : list) {
+      auto np = typeParsed_.find(s);
+      if (np != std::string::npos) {
+        typeParsed_.replace(np, s.size(), "");
+      }
+    }
+  }
+
+  void parseArray(const TOOLS::Object* obj) {
+    if (obj) {
+      bool forceOptional{false};
+
+      for (auto& o : obj->getChildren()) {
+        if (o->getF() == "null") {
+          forceOptional = true;
+        } else {
+          auto typeCWL = std::make_unique<TypeCWL>(o.get());
+          if (empty() && typeCWL->isGood()) {
+            typeBase_ = typeCWL->getTypeBase();
+            typeParsed_ = typeCWL->getTypeParsed();
+            array_ = typeCWL->isArray();
+            optional_ = typeCWL->isOptional();
+            for (auto& s : typeCWL->getSymbols()) symbols_.emplace_back(s);
+          }
+        }
+      }
+      if (forceOptional) optional_ = true;
+    }
+  }
+
+ public:
+  TypeCWL() = delete;
+  explicit TypeCWL(const TOOLS::Object* obj) {
+    resetError();
+    resetVals();
+
+    //    dumpCWLMODEL(obj, 0);
+
+    if (!obj->hasChildren() && !obj->isQlfEmpty()) {
+      typeBase_ = obj->getF();
+      setOtherValue();
+    } else {
+      auto theType = obj->find("type", "", false);
+      if (theType) {
+        auto theF = theType->getF();
+        if (!theF.empty()) {
+          if (theF == "array") {
+            auto items = obj->find("items", "", false);
+            if (items) {
+              parseArray(items);
+            }
+          } else if (theF == "enum") {
+            typeBase_ = "enum";
+            auto symbols = obj->find("symbols", "");
+            for (auto& s : symbols->getChildren()) {
+              if (!s->getF().empty()) symbols_.emplace_back(s->getF());
+            }
+            setOtherValue();
+          } else if (theF == "record") {
+            setError("Type RecordSchema not supported yet");
+            resetVals();
+            return;
+          } else {
+            typeBase_ = theF;
+            setOtherValue();
+          }
+        } else {
+          parseArray(theType);
+        }
+      }
+    }
+
+    setError("");
+  };
+  TypeCWL(const TypeCWL&) = default;
+  TypeCWL(TypeCWL&&) = default;
+  ~TypeCWL() = default;
+
+ public:
+  const std::string& getTypeBase() const { return typeBase_; }
+  const std::string& getTypeParsed() const { return typeParsed_; }
+  bool isGood() const { return good_; }
+  const std::string& getError() const { return error_; }
+  bool isArray() const { return array_; }
+  bool isOptional() const { return optional_; }
+  const std::list<std::string>& getSymbols() const { return symbols_; }
+  bool empty() { return typeBase_.empty(); }
+};
 
 class NamespaceCWL {
   std::string stac_{""};
@@ -46,8 +188,6 @@ class NamespaceCWL {
 
 const std::string& Parser::getName() const { return name; }
 
-/// Users/rdirienzo/Project/t2pc/src/t2serverwps/kungfu-wps/schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd?#117
-
 enum class OBJECT_NODE { INPUT, OUTPUT };
 
 using MAP_PARSER =
@@ -71,7 +211,7 @@ auto hasNamespace = [](const std::string& val) -> std::string {
 };
 
 using fnccwl = std::unique_ptr<OWS::Param>(const NamespaceCWL*,
-                                           const TOOLS::Object*);
+                                           const TOOLS::Object*, TypeCWL*);
 using tFnccwl = const std::function<fnccwl>;
 using MAP_PARSER_CWL = std::map<std::string, EOEPCA::tFnccwl>;
 
@@ -269,17 +409,6 @@ void parseProcessDescription(
   }
 }
 
-void dumpCWLMODEL(const TOOLS::Object* m, int level) {
-  level++;
-  std::string tab = std::string((level * 2), ' ');
-  std::cout << tab << "id: \"" << m->getQ() << "\" val: \"" << m->getF() << "\""
-            << "\n";
-
-  for (auto& i : m->getChildren()) {
-    dumpCWLMODEL(i.get(), level);
-  }
-}
-
 void getCWLInputDescriptor(const NamespaceCWL* namespaces,
                            const TOOLS::Object* obj,
                            EOEPCA::OWS::Descriptor& descriptor) {
@@ -383,7 +512,7 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     }
   }
 
-  //  std::cout << "descriptor: " << descriptor.getTag()
+  //  echo << "descriptor: " << descriptor.getTag()
   //            << " is null:" << (theReturnParam ? "TRUE" : "NULL")
   //            << " ID: " << descriptor.getIdentifier()
   //            << "\n";
@@ -397,8 +526,9 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
  * @return it type is null or the id is null --> returns null.
  */
 std::unique_ptr<OWS::Param> CWLTypeParser(const NamespaceCWL* namespaces,
-                                          const TOOLS::Object* obj) {
-  //  std::cout << "---------------CWLTypeParser\n";
+                                          const TOOLS::Object* obj,
+                                          TypeCWL* typeCWL) {
+  //  echo << "---------------CWLTypeParser\n";
   //  dumpCWLMODEL(obj,0);
 
   bool isArray{false};
@@ -438,48 +568,72 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
                     OWS::OWSProcessDescription* processDescription,
                     std::string_view type) {
   // ptrToNull
-  auto fnc = mapParserCwl[""];
 
-  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
-    fnc = mapParserCwl[getWithoutSquareBob(obj->getF())];
+  auto typeCWL = std::make_unique<TypeCWL>(obj);
+  if (typeCWL->isGood()) {
+    auto fnc = mapParserCwl[typeCWL->getTypeParsed()];
 
-    if (!fnc) {
-      std::string err("type: ");
-      err.append(obj->getF()).append(" not supported");
-      throw std::runtime_error(err);
+    if (fnc) {
+      std::unique_ptr<OWS::Param> ptrParam(nullptr);
+      ptrParam = fnc(namespaces, obj, typeCWL.get());
+      if (type == "inputs")
+        processDescription->addMoveInput(ptrParam);
+      else if (type == "outputs")
+        processDescription->addMoveOutput(ptrParam);
     }
+
   } else {
-    auto theType = obj->find("type", "", false);
-    if (theType) {
-      if (theType->hasChildren()) {
-        throw std::runtime_error(
-            "The ArraySchema type is supported only his simplification '[]'");
-      }
-      if (theType->getF() == "record") {
-        throw std::runtime_error("Type RecordSchema not supported yet");
-      }
-
-      fnc = mapParserCwl[getWithoutSquareBob(theType->getF())];
-      if (!fnc) {
-        std::string err("type: ");
-        err.append(obj->getF()).append(" not supported");
-        throw std::runtime_error(err);
-      }
-    }
+    std::string err("@parseCwlInputs ");
+    err.append(typeCWL->getError());
+    throw std::runtime_error(err);
   }
 
-  if (fnc) {
-    std::unique_ptr<OWS::Param> ptrParam(nullptr);
-    ptrParam = fnc(namespaces, obj);
-    if (type == "inputs")
-      processDescription->addMoveInput(ptrParam);
-    else if (type == "outputs")
-      processDescription->addMoveOutput(ptrParam);
-  }
+  //  echo << typeCWL->getTypeParsed() << "-->" << typeCWL->getTypeBase()
+  //       << " isOpt: " << typeCWL->isOptional() << "\n";
+  //
+
+  //  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
+  //    fnc = mapParserCwl[getWithoutSquareBob(obj->getF())];
+  //
+  //    if (!fnc) {
+  //      std::string err("type: ");
+  //      err.append(obj->getF()).append(" not supported");
+  //      throw std::runtime_error(err);
+  //    }
+  //  } else {
+  //    auto theType = obj->find("type", "", false);
+  //    if (theType) {
+  //      if (theType->hasChildren()) {
+  //        throw std::runtime_error(
+  //            "The ArraySchema type is supported only his simplification
+  //            '[]'");
+  //      }
+  //      if (theType->getF() == "record") {
+  //        throw std::runtime_error("Type RecordSchema not supported yet");
+  //      }
+  //
+  //      fnc = mapParserCwl[getWithoutSquareBob(theType->getF())];
+  //      if (!fnc) {
+  //        std::string err("type: ");
+  //        err.append(obj->getF()).append(" not supported");
+  //        throw std::runtime_error(err);
+  //      }
+  //    }
+  //  }
+  //
+  //  if (fnc) {
+  //    std::unique_ptr<OWS::Param> ptrParam(nullptr);
+  //    ptrParam = fnc(namespaces, obj);
+  //    if (type == "inputs")
+  //      processDescription->addMoveInput(ptrParam);
+  //    else if (type == "outputs")
+  //      processDescription->addMoveOutput(ptrParam);
+  //  }
 }
 
 std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
-                                        const TOOLS::Object* obj) {
+                                        const TOOLS::Object* obj,
+                                        TypeCWL* typeCWL) {
   bool isArray{false};
   std::string type;
 
@@ -522,7 +676,6 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
   if (ptrOffering) {
     MAP_PARSER_CWL mapParser{};
     for (auto& s : CWLTYPE_LIST) mapParser.emplace(FNCMAPS(s, CWLTypeParser));
-
     mapParser.emplace(FNCMAPS("enum", CWLTypeEnum));
 
     for (auto& content : ptrOffering->getContents()) {
