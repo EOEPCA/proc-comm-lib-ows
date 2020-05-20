@@ -10,6 +10,7 @@
 #define XMLNS_OWS "http://www.opengis.net/ows/1.1"
 #define XMLNS_PURL "http://purl.org/dc/elements/1.1/"
 #define XMLNS_STAC "http://www.me.net/stac/cwl/extension"
+#define XMLNS_OPENSEARCH "http://a9.com/-/spec/opensearch/1.1/"
 
 #define XML_DOCKER_TYPE "application/vnd.docker.distribution.manifest.v1+json"
 #define XML_CWL_TYPE "application/cwl"

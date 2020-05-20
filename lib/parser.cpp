@@ -158,7 +158,8 @@ class TypeCWL {
 
 class NamespaceCWL {
   std::string stac_{""};
-  std::string wps_{""};
+  std::string opensearch_{""};
+  std::string ows_{""};
 
  public:
   NamespaceCWL() = delete;
@@ -168,13 +169,9 @@ class NamespaceCWL {
   explicit NamespaceCWL(const TOOLS::Object* obj) {
     if (obj) {
       for (auto& a : obj->getChildren()) {
-        if (a->getF() == XMLNS_STAC) {
-          this->stac_ = a->getQ();
-        }
-
-        if (a->getF() == XMLNS_WPS1) {
-          this->wps_ = a->getQ();
-        }
+        if (a->getF() == XMLNS_STAC) this->stac_ = a->getQ();
+        if (a->getF() == XMLNS_OWS) this->ows_ = a->getQ();
+        if (a->getF() == XMLNS_OPENSEARCH) this->opensearch_ = a->getQ();
       }
     }
   }
@@ -183,7 +180,8 @@ class NamespaceCWL {
 
  public:
   const std::string& getStac() const { return stac_; }
-  const std::string& getWps() const { return wps_; }
+  const std::string& getOpensearch() const { return opensearch_; }
+  const std::string& getOws() const { return ows_; }
 };
 
 const std::string& Parser::getName() const { return name; }
@@ -192,7 +190,7 @@ enum class OBJECT_NODE { INPUT, OUTPUT };
 
 using MAP_PARSER =
     std::map<std::string,
-             const std::function<std::unique_ptr<OWS::Param>(xmlNode*)> >;
+             const std::function<std::unique_ptr<OWS::Param>(xmlNode*)>>;
 
 auto getWithoutSquareBob = [](const std::string& type) -> std::string {
   auto npos = type.find("[]");
@@ -440,7 +438,122 @@ void getCWLInputDescriptor(const NamespaceCWL* namespaces,
 
 std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
     const NamespaceCWL* namespaces, const TOOLS::Object* obj,
-    EOEPCA::OWS::Descriptor& descriptor) {
+    EOEPCA::OWS::Descriptor& descriptor, TypeCWL* typeCWL) {
+  std::unique_ptr<OWS::Param> theReturnParam{nullptr};
+
+  //  dumpCWLMODEL(obj, 0);
+
+  if (!namespaces->getOws().empty()) {
+    std::string mustBeIgnored{namespaces->getOws()};
+    mustBeIgnored.append(":ignore");
+    auto r = obj->find(mustBeIgnored, "", false);
+    if (r) return theReturnParam;
+  }
+
+  std::list<std::unique_ptr<EOEPCA::OWS::Format>> formats;
+  if (!namespaces->getStac().empty()) {
+    std::string catalog{namespaces->getStac()};
+    catalog.append(":catalog");
+
+    auto pCatalog = obj->find(catalog, "", false);
+    if (pCatalog) {
+      formats.emplace_back(new EOEPCA::OWS::Format("application/json"));
+      formats.emplace_back(new EOEPCA::OWS::Format("application/yaml"));
+    }
+  }
+
+  if (!namespaces->getOpensearch().empty()) {
+    std::string opensearch{namespaces->getOpensearch()};
+    opensearch.append(":url");
+    auto pOpensearch = obj->find(opensearch, "", false);
+    if (pOpensearch) {
+      formats.emplace_back(new EOEPCA::OWS::Format("application/atom+xml"));
+      formats.emplace_back(
+          new EOEPCA::OWS::Format("application/opensearchdescription+xml"));
+    }
+  }
+
+  if (!formats.empty()) {
+    auto cd = std::make_unique<OWS::ComplexData>();
+    std::unique_ptr<OWS::Format> formatDefault{nullptr};
+    for (auto& f : formats) {
+      if (!formatDefault) {
+        formatDefault = std::make_unique<OWS::Format>();
+        *formatDefault = *f;
+      }
+      cd->moveAddSupported(f);
+    }
+    if (formatDefault) {
+      cd->moveDefaultSupported(formatDefault);
+    }
+
+    theReturnParam = std::move(cd);
+  }
+
+  if (!namespaces->getOws().empty()) {
+    static std::string ows_BoundingBox{"ows:BoundingBox"};
+
+    std::string csr{namespaces->getOws()};
+    csr.append(":CRS");
+
+    auto pCsr = obj->find(csr, "", false);
+    if (pCsr && obj->findAndReturnF("format", "", false) == ows_BoundingBox) {
+      auto boundingBoxData = std::make_unique<OWS::BoundingBoxData>();
+
+      bool isSet = false;
+      for (auto& s : obj->getChildren()) {
+        boundingBoxData->addSupportedValues(s->getF());
+        if (!isSet) {
+          isSet = true;
+          boundingBoxData->setDefault(s->getF());
+        }
+      }
+
+      theReturnParam = std::move(boundingBoxData);
+    }
+  }
+
+  if (!theReturnParam) {
+    auto literData = std::make_unique<OWS::LiteralData>();
+    literData->setDataType(typeCWL->getTypeParsed());
+    literData->setDefault(obj->findAndReturnF("default", "", false));
+
+    if (typeCWL->getTypeParsed() == "enum") {
+      literData->setDataType("string");
+      for (auto& a : typeCWL->getSymbols()) {
+        literData->addAllowedValues(a);
+        if (literData->getDefaultValue().empty()) {
+          literData->setDataType(a);
+        }
+      }
+    }
+
+    theReturnParam = std::move(literData);
+  }
+
+  // generic
+  if (theReturnParam) {
+    // isArray
+    theReturnParam->setIdentifier(descriptor.getIdentifier());
+    theReturnParam->setTitle(descriptor.getTitle());
+    theReturnParam->setAbstract(descriptor.getAbstract());
+    theReturnParam->setMinOccurs(1);
+    if (typeCWL->isArray()) {
+      theReturnParam->setMaxOccurs(999);
+    }
+
+    if (typeCWL->isOptional()) {
+      theReturnParam->setMinOccurs(0);
+      theReturnParam->setMaxOccurs(1);
+    }
+  }
+
+  return theReturnParam;
+}
+
+std::unique_ptr<OWS::Param> CWLTypeParserSpecialization2(
+    const NamespaceCWL* namespaces, const TOOLS::Object* obj,
+    EOEPCA::OWS::Descriptor& descriptor, TypeCWL* typeCWL) {
   std::unique_ptr<OWS::Param> theReturnParam{nullptr};
 
   if (!namespaces->getStac().empty()) {
@@ -528,39 +641,15 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
 std::unique_ptr<OWS::Param> CWLTypeParser(const NamespaceCWL* namespaces,
                                           const TOOLS::Object* obj,
                                           TypeCWL* typeCWL) {
-  //  echo << "---------------CWLTypeParser\n";
-  //  dumpCWLMODEL(obj,0);
-
-  bool isArray{false};
-  std::string type;
-
-  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
-    type = obj->getF();
-  }
-  if (type.empty()) {
-    type = obj->findAndReturnF("type", "", false);
-  }
-
-  auto a = type.find("[]");
-  if (a != std::string::npos) {
-    isArray = true;
-    type.replace(a, 2, "");
-  }
-
-  if (type == "null" || type == "null[]") {
-    return nullptr;
-  }
-
   EOEPCA::OWS::Descriptor descriptor;
-  descriptor.setTag(type);
-  descriptor.setIsArray(isArray);
+  descriptor.setTag(typeCWL->getTypeParsed());
   getCWLInputDescriptor(namespaces, obj, descriptor);
 
   if (descriptor.getIdentifier().empty()) {
     return nullptr;
   }
 
-  return CWLTypeParserSpecialization(namespaces, obj, descriptor);
+  return CWLTypeParserSpecialization(namespaces, obj, descriptor, typeCWL);
 }
 
 void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
@@ -572,7 +661,6 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
   auto typeCWL = std::make_unique<TypeCWL>(obj);
   if (typeCWL->isGood()) {
     auto fnc = mapParserCwl[typeCWL->getTypeParsed()];
-
     if (fnc) {
       std::unique_ptr<OWS::Param> ptrParam(nullptr);
       ptrParam = fnc(namespaces, obj, typeCWL.get());
@@ -587,89 +675,23 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
     err.append(typeCWL->getError());
     throw std::runtime_error(err);
   }
-
-  //  echo << typeCWL->getTypeParsed() << "-->" << typeCWL->getTypeBase()
-  //       << " isOpt: " << typeCWL->isOptional() << "\n";
-  //
-
-  //  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
-  //    fnc = mapParserCwl[getWithoutSquareBob(obj->getF())];
-  //
-  //    if (!fnc) {
-  //      std::string err("type: ");
-  //      err.append(obj->getF()).append(" not supported");
-  //      throw std::runtime_error(err);
-  //    }
-  //  } else {
-  //    auto theType = obj->find("type", "", false);
-  //    if (theType) {
-  //      if (theType->hasChildren()) {
-  //        throw std::runtime_error(
-  //            "The ArraySchema type is supported only his simplification
-  //            '[]'");
-  //      }
-  //      if (theType->getF() == "record") {
-  //        throw std::runtime_error("Type RecordSchema not supported yet");
-  //      }
-  //
-  //      fnc = mapParserCwl[getWithoutSquareBob(theType->getF())];
-  //      if (!fnc) {
-  //        std::string err("type: ");
-  //        err.append(obj->getF()).append(" not supported");
-  //        throw std::runtime_error(err);
-  //      }
-  //    }
-  //  }
-  //
-  //  if (fnc) {
-  //    std::unique_ptr<OWS::Param> ptrParam(nullptr);
-  //    ptrParam = fnc(namespaces, obj);
-  //    if (type == "inputs")
-  //      processDescription->addMoveInput(ptrParam);
-  //    else if (type == "outputs")
-  //      processDescription->addMoveOutput(ptrParam);
-  //  }
 }
 
 std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
                                         const TOOLS::Object* obj,
                                         TypeCWL* typeCWL) {
-  bool isArray{false};
-  std::string type;
-
-  if (!obj->hasChildren() && !obj->isQlfEmpty()) {
-    type = obj->getF();
-  }
-  if (type.empty()) {
-    type = obj->findAndReturnF("type", "", false);
-  }
-
-  auto a = type.find("[]");
-  if (a != std::string::npos) {
-    isArray = true;
-    type.replace(a, 2, "");
-  }
-
-  if (type == "null" || type == "null[]") {
-    return nullptr;
-  }
-
   EOEPCA::OWS::Descriptor descriptor;
-  descriptor.setTag(type);
-  descriptor.setIsArray(isArray);
+  descriptor.setTag(typeCWL->getTypeParsed());
   getCWLInputDescriptor(namespaces, obj, descriptor);
 
   if (descriptor.getIdentifier().empty()) {
     descriptor.setIdentifier(obj->findAndReturnF("name", "", false));
   }
-
   if (descriptor.getIdentifier().empty()) {
     return nullptr;
   }
 
-  return CWLTypeParserSpecialization(namespaces, obj, descriptor);
-
-  return nullptr;
+  return CWLTypeParserSpecialization(namespaces, obj, descriptor, typeCWL);
 }
 
 void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {

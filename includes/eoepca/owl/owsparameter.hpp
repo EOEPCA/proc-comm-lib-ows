@@ -27,8 +27,7 @@ class Descriptor {
         version(other.version),
         abstract(other.abstract),
         tag(other.tag),
-        isArray(other.isArray)
-        {}
+        isArray(other.isArray) {}
 
   Descriptor(Descriptor &&other) noexcept(false)
       : identifier(std::move(other.identifier)),
@@ -36,7 +35,7 @@ class Descriptor {
         abstract(std::move(other.abstract)),
         version(std::move(other.version)),
         tag(std::move(other.tag)),
-        isArray(other.isArray){}
+        isArray(other.isArray) {}
 
   Descriptor &operator=(const Descriptor &other) {
     if (this == &other) return *this;
@@ -79,7 +78,7 @@ class Descriptor {
   }
   const std::string &getTitle() const { return title; }
   void setTitle(const std::string &title) { Descriptor::title = title; }
-  const std::string & getAbstract() const { return abstract; }
+  const std::string &getAbstract() const { return abstract; }
   void setAbstract(const std::string &abstract) {
     Descriptor::abstract = abstract;
   }
@@ -304,11 +303,21 @@ class Format {
 
  public:
   Format() = default;
-
+  explicit Format(std::string sMimeType)
+      : mimeType(sMimeType), encoding(""), schema("") {}
   Format(const LiteralData &) = delete;
   Format(Format &&) = delete;
 
   ~Format() {}
+
+  Format &operator=(const Format &other) {
+    if (this != &other) {
+      mimeType = other.mimeType;
+      encoding = other.encoding;
+      schema = other.schema;
+    }
+    return *this;
+  }
 
   void setMimeType(std::string pMimeType) {
     Format::mimeType = std::move(pMimeType);
@@ -330,6 +339,7 @@ class ComplexData final : public Param {
   long maximumMegabytes = 0;
 
   std::string defaultString{""};
+
  public:
   ComplexData() = default;
 
@@ -442,10 +452,11 @@ class OWSOffering {
 
  public:
   /**
-   * The content of the property tag could be altered by adding a value such as CWL
+   * The content of the property tag could be altered by adding a value such as
+   * CWL
    * @return
    */
-  std::list<Content> &getContents()  { return contents; }
+  std::list<Content> &getContents() { return contents; }
 
   void addContent(std::string code, std::string href) {
     if (!code.empty()) {
