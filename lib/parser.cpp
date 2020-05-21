@@ -515,7 +515,12 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
 
   if (!theReturnParam) {
     auto literData = std::make_unique<OWS::LiteralData>();
-    literData->setDataType(typeCWL->getTypeParsed());
+
+    if (typeCWL->getTypeParsed()=="File" || typeCWL->getTypeParsed()=="Directory"){
+      literData->setDataType("string");
+    }else{
+      literData->setDataType(typeCWL->getTypeParsed());
+    }
     literData->setDefault(obj->findAndReturnF("default", "", false));
 
     if (typeCWL->getTypeParsed() == "enum") {
