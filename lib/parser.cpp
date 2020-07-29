@@ -164,7 +164,12 @@ class TypeCWL {
               }else{
                 typeBase_=items->getF();
               }
+              bool myOpt=isOptional();
               setOtherValue();
+
+              if(myOpt){
+                this->optional_=true;
+              }
               this->array_=true;
 
             }
@@ -615,7 +620,9 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
 
     if (typeCWL->isOptional()) {
       theReturnParam->setMinOccurs(0);
-      theReturnParam->setMaxOccurs(1);
+      if (theReturnParam->getMaxOccurs()==0){
+        theReturnParam->setMaxOccurs(1);
+      }
     }
   }
 
