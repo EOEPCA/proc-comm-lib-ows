@@ -79,28 +79,17 @@ class TypeCWL {
 
   void parseOther(const TOOLS::Object* obj) {
     if (obj){
-
-      echo << "****************\n";
-        dumpCWLMODEL(obj, 0);
-      echo << "****************\n";
-
       auto qf=obj->getQlf();
       if (qf.first=="type" && qf.second.empty()){
 
         TOOLS::Object a;
         a.setQlf("noBase","");
         for (auto& o : obj->getChildren()) {
-//          if (!o->isQlfEmpty())
             a.addChildren(o.get());
         }
         //=============================================
         //TODO: create operator=
         //=============================================
-
-        echo << "--------\n";
-        dumpCWLMODEL(&a, 0);
-        echo << "--------\n";
-
         auto typeCWL = std::make_unique<TypeCWL>( &a);
         if (empty() && typeCWL->isGood()) {
           typeBase_ = typeCWL->getTypeBase();
@@ -176,9 +165,10 @@ class TypeCWL {
           } else if (theF == "enum") {
             typeBase_ = "enum";
             auto symbols = obj->find("symbols", "");
-            for (auto& s : symbols->getChildren()) {
-              if (!s->getF().empty()) symbols_.emplace_back(s->getF());
-            }
+            if(symbols)
+              for (auto& s : symbols->getChildren()) {
+                if (!s->getF().empty()) symbols_.emplace_back(s->getF());
+              }
             setOtherValue();
           } else if (theF == "record") {
             setError("Type RecordSchema not supported yet");
