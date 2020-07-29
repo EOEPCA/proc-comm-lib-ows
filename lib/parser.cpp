@@ -102,15 +102,15 @@ class TypeCWL {
   explicit TypeCWL(const TOOLS::Object* obj) {
     resetError();
     resetVals();
-
-    //    dumpCWLMODEL(obj, 0);
-
     if (!obj->hasChildren() && !obj->isQlfEmpty()) {
       typeBase_ = obj->getF();
       setOtherValue();
     } else {
       auto theType = obj->find("type", "", false);
       if (theType) {
+
+        dumpCWLMODEL(obj, 0);
+
         auto theF = theType->getF();
         if (!theF.empty()) {
           if (theF == "array") {
@@ -134,7 +134,16 @@ class TypeCWL {
             setOtherValue();
           }
         } else {
-          parseArray(theType);
+
+          if (!theType->isArray()){
+
+            auto subType = obj->find("type", "");
+//            dumpCWLMODEL(subType, 0);
+
+
+
+          }else
+            parseArray(theType);
         }
       }
     }
@@ -189,8 +198,8 @@ const std::string& Parser::getName() const { return name; }
 enum class OBJECT_NODE { INPUT, OUTPUT };
 
 using MAP_PARSER =
-    std::map<std::string,
-             const std::function<std::unique_ptr<OWS::Param>(xmlNode*)>>;
+std::map<std::string,
+    const std::function<std::unique_ptr<OWS::Param>(xmlNode*)>>;
 
 auto getWithoutSquareBob = [](const std::string& type) -> std::string {
   auto npos = type.find("[]");
@@ -457,8 +466,9 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
 
     auto pCatalog = obj->find(catalog, "", false);
     if (pCatalog) {
-      formats.emplace_back(new EOEPCA::OWS::Format("application/json"));
-      formats.emplace_back(new EOEPCA::OWS::Format("application/yaml"));
+      formats.emplace_back(new EOEPCA::OWS::Format("application/opensearchdescription+xml"));
+      formats.emplace_back(new EOEPCA::OWS::Format("application/atom+xml"));
+      formats.emplace_back(new EOEPCA::OWS::Format("application/geo+json; profile=stac"));
     }
   }
 
@@ -528,7 +538,7 @@ std::unique_ptr<OWS::Param> CWLTypeParserSpecialization(
       for (auto& a : typeCWL->getSymbols()) {
         literData->addAllowedValues(a);
         if (literData->getDefaultValue().empty()) {
-          literData->setDataType(a);
+          literData->setDefault(a);
         }
       }
     }
@@ -604,6 +614,10 @@ void parseCwlInputs(MAP_PARSER_CWL& mapParserCwl,
 std::unique_ptr<OWS::Param> CWLTypeEnum(const NamespaceCWL* namespaces,
                                         const TOOLS::Object* obj,
                                         TypeCWL* typeCWL) {
+
+
+//  dumpCWLMODEL(obj,0);
+
   EOEPCA::OWS::Descriptor descriptor;
   descriptor.setTag(typeCWL->getTypeParsed());
   getCWLInputDescriptor(namespaces, obj, descriptor);
@@ -657,7 +671,7 @@ void parserOfferingCWL(std::unique_ptr<OWS::OWSOffering>& ptrOffering) {
                 pWorkflow->findAndReturnF(owsVersion, "", false));
             if (processDescription->getVersion().empty()) {
 
-              dumpCWLMODEL(pWorkflow,0);
+//              dumpCWLMODEL(pWorkflow,0);
 
               std::string err{"Workflow version empty."};
               throw std::runtime_error(err);
@@ -708,8 +722,18 @@ void parseOffering(xmlNode* offering_node,
       xmlChar* type = xmlGetProp(inner_cur_node, (const xmlChar*)"type");
       xmlChar* href = xmlGetProp(inner_cur_node, (const xmlChar*)"href");
 
-      ptrOffering->addContent(std::string(CHAR_BAD_CAST type),
-                              std::string(CHAR_BAD_CAST href));
+      if (href){
+        ptrOffering->addContent(std::string(CHAR_BAD_CAST type),
+                                std::string(CHAR_BAD_CAST href));
+      }{
+        ptrOffering->addContentTag(
+            std::string(CHAR_BAD_CAST type),
+            std::string(CHAR_BAD_CAST xmlNodeGetContent(inner_cur_node))
+            );
+//        echo << "------------------\n";
+//        echo << CHAR_BAD_CAST xmlNodeGetContent(inner_cur_node) << "\n";
+//        echo << "------------------\n";
+      }
 
     } else if (IS_CHECK(inner_cur_node, "operation", XMLNS_OWC)) {
       xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"code");
@@ -747,12 +771,16 @@ void parseEntry(xmlNode* entry_node, std::unique_ptr<OWS::OWSEntry>& owsEntry) {
 
         for (auto& content : ptrOffering->getContents()) {
           if (content.type == XML_CWL_TYPE) {
-            auto res = getFromWeb(content.tag, content.href.c_str());
-            if (res != 200) {
-              std::string err{"href: "};
-              err.append(content.href).append(" can't be downloaded");
-              throw std::runtime_error(err);
+            if (!content.href.empty()){
+
+              auto res = getFromWeb(content.tag, content.href.c_str());
+              if (res != 200) {
+                std::string err{"href: "};
+                err.append(content.href).append(" can't be downloaded");
+                throw std::runtime_error(err);
+              }
             }
+
           }
         }
 
