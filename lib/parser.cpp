@@ -7,6 +7,8 @@
 #include <memory>
 #include <optional>
 
+#include <fstream>//TOREMOVE
+
 #include "includes/httpfuntions.hpp"
 #include "includes/macro.hpp"
 #include "includes/yaml/yaml.hpp"
@@ -75,14 +77,54 @@ class TypeCWL {
     }
   }
 
+  void parseOther(const TOOLS::Object* obj) {
+    if (obj){
+
+      echo << "****************\n";
+        dumpCWLMODEL(obj, 0);
+      echo << "****************\n";
+
+      auto qf=obj->getQlf();
+      if (qf.first=="type" && qf.second.empty()){
+
+        TOOLS::Object a;
+        a.setQlf("noBase","");
+        for (auto& o : obj->getChildren()) {
+//          if (!o->isQlfEmpty())
+            a.addChildren(o.get());
+        }
+        //=============================================
+        //TODO: create operator=
+        //=============================================
+
+        echo << "--------\n";
+        dumpCWLMODEL(&a, 0);
+        echo << "--------\n";
+
+        auto typeCWL = std::make_unique<TypeCWL>( &a);
+        if (empty() && typeCWL->isGood()) {
+          typeBase_ = typeCWL->getTypeBase();
+          typeParsed_ = typeCWL->getTypeParsed();
+          array_ = typeCWL->isArray();
+          optional_ = typeCWL->isOptional();
+          for (auto& s : typeCWL->getSymbols()) symbols_.emplace_back(s);
+        }
+        //=============================================
+      }
+    }
+  }
+
   void parseArray(const TOOLS::Object* obj) {
     if (obj) {
       bool forceOptional{false};
 
       for (auto& o : obj->getChildren()) {
-        if (o->getF() == "null") {
+        if (o->isQlfEmpty()) {
           forceOptional = true;
         } else {
+          //=============================================
+          //TODO: create operator=
+          //=============================================
           auto typeCWL = std::make_unique<TypeCWL>(o.get());
           if (empty() && typeCWL->isGood()) {
             typeBase_ = typeCWL->getTypeBase();
@@ -91,9 +133,12 @@ class TypeCWL {
             optional_ = typeCWL->isOptional();
             for (auto& s : typeCWL->getSymbols()) symbols_.emplace_back(s);
           }
+          //=============================================
         }
       }
-      if (forceOptional) optional_ = true;
+      if (forceOptional) {
+        optional_ = true;
+      }
     }
   }
 
@@ -108,15 +153,20 @@ class TypeCWL {
     } else {
       auto theType = obj->find("type", "", false);
       if (theType) {
-
-        dumpCWLMODEL(obj, 0);
-
         auto theF = theType->getF();
         if (!theF.empty()) {
           if (theF == "array") {
             auto items = obj->find("items", "", false);
             if (items) {
-              parseArray(items);
+
+              if (items->getF().empty()){
+                parseArray(items);
+              }else{
+                typeBase_=items->getF();
+              }
+              setOtherValue();
+              this->array_=true;
+
             }
           } else if (theF == "enum") {
             typeBase_ = "enum";
@@ -135,15 +185,21 @@ class TypeCWL {
           }
         } else {
 
-          if (!theType->isArray()){
-
-            auto subType = obj->find("type", "");
-//            dumpCWLMODEL(subType, 0);
-
-
-
-          }else
+          if(theType->isArray()){
             parseArray(theType);
+          }else{
+
+            parseOther(theType);
+//            setOtherValue();
+          }
+
+
+
+//          if (!theType->isArray()){
+//            parseOther(theType);
+//          }else
+
+//            parseArray(theType);
         }
       }
     }
@@ -726,13 +782,15 @@ void parseOffering(xmlNode* offering_node,
         ptrOffering->addContent(std::string(CHAR_BAD_CAST type),
                                 std::string(CHAR_BAD_CAST href));
       }{
+
+//        std::ifstream ifs("myfile.txt");
+//        std::string content( (std::istreambuf_iterator<char>(ifs) ),
+//                             (std::istreambuf_iterator<char>()    ) );
+
         ptrOffering->addContentTag(
             std::string(CHAR_BAD_CAST type),
             std::string(CHAR_BAD_CAST xmlNodeGetContent(inner_cur_node))
             );
-//        echo << "------------------\n";
-//        echo << CHAR_BAD_CAST xmlNodeGetContent(inner_cur_node) << "\n";
-//        echo << "------------------\n";
       }
 
     } else if (IS_CHECK(inner_cur_node, "operation", XMLNS_OWC)) {

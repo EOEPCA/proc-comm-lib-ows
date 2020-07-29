@@ -202,8 +202,8 @@ TEST(eoepcaows_02, inputs_list_from_catalog) {
       ptrContext(lib->parseFromMemory(fileBuffer.c_str(),fileBuffer.size()), lib->releaseParameter);
 
 //
-//  std::cout << "CWL: \n";
-//  std::cout << fileBuffer << "\n";
+  std::cout << "CWL: \n";
+  std::cout << fileBuffer << "\n\n\n\n";
 
 
   EXPECT_NE(nullptr, ptrContext.get());
