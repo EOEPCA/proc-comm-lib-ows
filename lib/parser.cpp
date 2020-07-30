@@ -62,7 +62,11 @@ class TypeCWL {
 
   void setOtherValue() {
     auto nposBob = typeBase_.find("[]");
-    array_ = (nposBob != std::string::npos);
+
+    if (!array_){
+      array_ = (nposBob != std::string::npos);
+    }
+
     auto nposQM = typeBase_.find("?");
     optional_ = (nposQM != std::string::npos);
 
@@ -183,18 +187,8 @@ class TypeCWL {
           if(theType->isArray()){
             parseArray(theType);
           }else{
-
             parseOther(theType);
-//            setOtherValue();
           }
-
-
-
-//          if (!theType->isArray()){
-//            parseOther(theType);
-//          }else
-
-//            parseArray(theType);
         }
       }
     }
