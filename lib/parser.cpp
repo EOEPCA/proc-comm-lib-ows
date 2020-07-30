@@ -791,9 +791,9 @@ void parseOffering(xmlNode* offering_node,
       }
 
     } else if (IS_CHECK(inner_cur_node, "operation", XMLNS_OWC)) {
-      xmlChar* code = xmlGetProp(inner_cur_node, (const xmlChar*)"code");
-      if (code) {
-        if (XML_COMPARE(code, "DescribeProcess")) {
+      xmlChar* mCode = xmlGetProp(inner_cur_node, (const xmlChar*)"code");
+      if (mCode) {
+        if (XML_COMPARE(mCode, "DescribeProcess")) {
           if (inner_cur_node->children) {
             FOR(desc, inner_cur_node->children) {
               if (IS_CHECK(desc, "ProcessDescription", XMLNS_ATOM)) {

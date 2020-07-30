@@ -192,19 +192,31 @@ TEST(eoepcaows_02, inputs_list_from_catalog) {
   auto util = std::make_unique<Util>();
   std::string path{util->getLibName()};
 
+  std::cout << "start download OWS..."  <<"\n";
   std::string fileBuffer{""};
-  getFromWeb(fileBuffer,"https://catalog.terradue.com/eoepca-services/search?uid=test_parer");
+  getFromWeb(fileBuffer,"https://catalog.terradue.com/eoepca-services/search?uid=test_entites");
 
+  std::cout << "CWL: \n";
+  std::cout << fileBuffer << "\n\n\n\n";
+
+
+  std::cout <<"lib: "<< path << "\n";
 
   auto lib = std::make_unique<EOEPCA::EOEPCAows>(path);
+
+  EXPECT_TRUE(lib->IsValid());
+
+  if(!lib->IsValid()){
+    std::cout << "EOEPCAows lib not valid";
+    return;
+  }
+
   std::unique_ptr<EOEPCA::OWS::OWSContext,
       std::function<void(EOEPCA::OWS::OWSContext*)>>
       ptrContext(lib->parseFromMemory(fileBuffer.c_str(),fileBuffer.size()), lib->releaseParameter);
 
-//
-  std::cout << "CWL: \n";
-  std::cout << fileBuffer << "\n\n\n\n";
 
+  std::cout << "parser... end"  <<"\n";
 
   EXPECT_NE(nullptr, ptrContext.get());
   if (ptrContext) {
