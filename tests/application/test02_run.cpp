@@ -43,6 +43,50 @@ void  printResults(const std::unique_ptr<EOEPCA::OWS::Param>& input){
   }
   if (input->getType() == "LiteralData") {
     auto data = dynamic_cast<EOEPCA::OWS::LiteralData*>(input.get());
+
+    if ("int_parameter"==data->getIdentifier()){
+      EXPECT_EQ(data->getTitle(),"Title of int_parameter");
+      EXPECT_EQ(data->getAbstract(),"Abstract describing int_parameter");
+      EXPECT_EQ(data->getDataType(),"integer");
+      EXPECT_EQ(data->getMinOccurs(),1);
+      EXPECT_EQ(data->getMaxOccurs(),1);
+    }
+
+    if ("string_parameter"==data->getIdentifier()){
+      EXPECT_EQ(data->getTitle(),"Title of string_parameter");
+      EXPECT_EQ(data->getAbstract(),"Abstract describing string_parameter");
+      EXPECT_EQ(data->getDataType(),"string");
+      EXPECT_EQ(data->getMinOccurs(),1);
+      EXPECT_EQ(data->getMaxOccurs(),1);
+      EXPECT_EQ(data->getDefaultValue(),"CIAO a te");
+    }
+
+    if ("string_parameter_arr"==data->getIdentifier()){
+      EXPECT_EQ(data->getTitle(),"Title of string_parameter_arr");
+      EXPECT_EQ(data->getAbstract(),"Abstract describing string_parameter_arr");
+      EXPECT_EQ(data->getDataType(),"string");
+      EXPECT_EQ(data->getMinOccurs(),1);
+      EXPECT_EQ(data->getMaxOccurs(),999);
+    }
+
+    if ("string_with_options_parameter"==data->getIdentifier()){
+      EXPECT_EQ(data->getTitle(),"Title of string_with_options_parameter");
+      EXPECT_EQ(data->getDataType(),"string");
+      EXPECT_EQ(data->getMinOccurs(),1);
+      EXPECT_EQ(data->getMaxOccurs(),1);
+      EXPECT_EQ(data->getAllowedValues().size(),3);
+      int count{0};
+      for(auto&v:data->getAllowedValues()){
+        if (v=="‘option1’"||v=="‘options2’"||v=="‘option3’" ){
+          count++;
+        }
+      }
+      EXPECT_EQ(count,3);
+    }
+
+
+
+
     std::cout << "getDataType: " << data->getDataType() << "\n";
     std::cout << "getAllowedValuesSize: "
               << data->getAllowedValues().size() << "\n";
