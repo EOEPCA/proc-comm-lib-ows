@@ -73,7 +73,7 @@ s:author:
   - class: s:Organization
     s:url: http://www.terradue.com
 
-s:softwareVersion: pardd
+s:softwareVersion: 0.8
 
 s:maintainer: 
   - class: s:Person
