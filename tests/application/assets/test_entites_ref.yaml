@@ -1,3 +1,4 @@
+$graph:
 - baseCommand: s3-slstr-tiling
   class: CommandLineTool
   hints:
@@ -39,6 +40,13 @@
       type: integer
       default: 100
 
+    int_parameter_optional:
+      label: Title of int_parameter
+      doc: Abstract describing int_parameter
+      type: integer?
+      default: 100
+
+      
     boolean_parameter:
       label: Title of boolean_parameter
       doc: Abstract describing boolean_parameter
@@ -67,13 +75,13 @@
       label: Title of string_parameter
       doc: Abstract describing string_parameter
       type: string
-      default: CIAO a te
+      default: default string
 
     string_parameter_arr:
       label: Title of string_parameter_arr
       doc: Abstract describing string_parameter_arr
       type: string[]
-      default: CIAO a te
+      default: default string
 
     File_parameter:
       label: Title of File_parameter
@@ -120,7 +128,7 @@
     string_parameter_arr_items:
       label: Title of string_parameter_arr_items
       doc: Abstract describing string_parameter_arr_items
-      type:
+      type: 
         type: array
         items:
           - string
@@ -129,7 +137,7 @@
       label: Title of string_with_options_parameter
       type:
         type: enum
-        symbols: [‘option1’, ‘options2’, ‘option3’]
+        symbols: [‘option1’, ‘option2’, ‘option3’]
 
     string_with_options_parameter_ser:
       label: Title of string_with_options_parameter_ser
@@ -139,7 +147,7 @@
     string_parameter_arr_items_integer:
       label: Title of string_parameter_arr_items_integer
       doc: Abstract describing string_parameter_arr_items_integer
-      type:
+      type: 
         type: array
         items:
           - integer
@@ -150,23 +158,33 @@
       type: integer[]
       default: 100
 
+
+    Directory_parameter_arr_spl:
+      label: Title of Directory_parameter_arr_spl
+      doc: Abstract describing Directory_parameter_arr_spl
+      type: array
+      items: Directory
+      
+
+
+
   label: eoepca test_entites
   outputs:
-    - id: wf_outputs
-      outputSource:
-        - node_1/results
-      type:
-        items: Directory
-        type: array
+  - id: wf_outputs
+    outputSource:
+    - node_1/results
+    type:
+      items: Directory
+      type: array
   requirements:
-    - class: ScatterFeatureRequirement
+  - class: ScatterFeatureRequirement
   steps:
     node_1:
       in:
         inp1: input_reference
         inp2: tiling_level
       out:
-        - results
+      - results
       run: '#clt'
       scatter: inp1
       scatterMethod: dotproduct
