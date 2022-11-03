@@ -20,4 +20,4 @@ docker run --rm -ti -v $PWD:/project/ -w /project/build ${BUILDER_ENV_IMAGE} mak
 mkdir -p demo
 cp $PWD/tests/application/assets/ows2.xml $PWD/build/libeoepcaows.so $PWD/build/runner $PWD/build/tests/libtest-test demo
 
-cd demo && ./runner ows2.xml && ./libtest-test --gtest_break_on_failure
+cd demo && ./runner ows2.xml && ./libtest-test --gtest_break_on_failure  --gtest_filter=eoepcaows_02.inputs_enum_optional
