@@ -195,7 +195,14 @@ $graph:
       items: Directory
       
 
-
+    int_string_parameter:
+      label: Title of int_string_parameter
+      doc: Abstract describing int_string_parameter
+      type:
+        - type: integer
+          default: 100
+        - type: string
+          default: default string
 
   label: eoepca test_entites
   outputs:
